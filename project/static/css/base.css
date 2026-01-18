@@ -1,0 +1,20 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    padding: 20px;
+    height: 100vh;
+}
+.aside{
+     border: 2px solid  hsl(0, 0%, 30%);  
+     background-color: hsl(0, 0%, 70%);  
+}
+.aside2{
+    border: 2px solid  hsl(0, 0%, 30%);
+    background-color: hsl(0, 0%, 70%);
+}

@@ -1,0 +1,35 @@
+Byte-compiled / optimized / DLL files
+
+pycache/
+*.py[cod]
+*$py.class
+
+Virtual Environment
+
+.venv/
+venv/
+env/
+ENV/
+
+Database files (SQLite)
+
+instance/
+*.db
+*.sqlite
+
+Environment variables / Secrets
+
+NEVER upload this file to GitHub
+
+.env
+.flaskenv
+
+IDE - VS Code / PyCharm
+
+.vscode/
+.idea/
+
+Operating System files
+
+Thumbs.db
+.DS_Store
