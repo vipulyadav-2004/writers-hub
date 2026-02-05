@@ -11,12 +11,16 @@
       <div class="container">
         <a class="navbar-brand" href="{{ url_for('main.main_page') }}">Writer's Hub</a>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('main.main_page') }}">Feed</a></li>
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('main.main_page') }}">Home Feed</a></li>
             {% if current_user.is_authenticated %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('main.create_post') }}">New Post</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('main.create_post') }}">New Post</a></li>
+            {% endif %}
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            {% if current_user.is_authenticated %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('main.profile_page') }}">Profile</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('main.logout_page') }}">Logout</a></li>
+              <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('main.logout_page') }}">Logout</a></li>
             {% else %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login_page') }}">Login</a></li>
               <li class="nav-item"><a class="nav-link" href="{{ url_for('main.register_page') }}">Register</a></li>
@@ -25,7 +29,6 @@
         </div>
       </div>
     </nav>
-
     <main class="container">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -36,5 +39,27 @@
       {% endwith %}
       {% block content %}{% endblock %}
     </main>
+    <script>
+    function handleCredentialResponse(response) {
+        // This takes the Google token and sends it to your Flask route
+        fetch("{{ url_for('main.google_auth') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: response.credential })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                // Redirect user after successful login
+                window.location.href = "{{ url_for('main.main_page') }}";
+            } else {
+                alert("Login Failed: " + data.message);
+            }
+        })
+        .catch(err => console.error("Error:", err));
+    }
+    </script>
   </body>
 </html>

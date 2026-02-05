@@ -5,3 +5,5 @@ Flask-Login
 Flask-Migrate
 Werkzeug
 email-validator
+python-dotenv
+google-auth requests

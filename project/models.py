@@ -32,6 +32,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     body = db.Column(db.Text, nullable=False)
+    author_name = db.Column(db.String(100), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     
     # Foreign key to link posts to users

@@ -1,19 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}
-<title>Home - Writer's Hub</title>
-{% endblock %}
-
 {% block content %}
-    <div class="jumbotron mt-5">
-        <h1>Welcome to the Writer's Hub</h1>
-        <p class="lead">A place for poets, bloggers, and storytellers.</p>
-        <hr class="my-4">
-        {% if session.get('username') %}
-            <p>Welcome back, {{ session['username'] }}!</p>
+<div class="row">
+    <div class="col-md-10 col-lg-8 mx-auto">
+        
+        {# --- LOGGED IN VIEW: Show the writing feed --- #}
+        {% if current_user.is_authenticated %}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Writer's Feed</h1>
+                <a href="{{ url_for('main.create_post') }}" class="btn btn-success">Write Something New</a>
+            </div>
+
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="card mb-4 shadow-sm border-0">
+                        <div class="card-body">
+                            <h2 class="card-title h4">{{ post.title }}</h2>
+                            <p class="post-meta">
+                                By <strong>{{ post.author.username }}</strong> 
+                                on {{ post.timestamp.strftime('%B %d, %Y') }}
+                            </p>
+                            <hr>
+                            <p class="card-text post-body">{{ post.body }}</p>
+                            <hr>
+                            <p class="card-text h4">{{post.author_name}}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center p-5 bg-white rounded shadow-sm">
+                    <h3>The feed is empty.</h3>
+                    <p>Be the first one to share a story!</p>
+                </div>
+            {% endif %}
+
+        {# --- GUEST VIEW: Show the welcome message and login button --- #}
         {% else %}
-            <p>Please login to start writing.</p>
-            <a class="btn btn-primary btn-lg" href="{{ url_for('main.login_page') }}" role="button">Login</a>
+            <div class="text-center py-5 bg-white rounded shadow-sm px-4">
+                <h1 class="display-4 fw-bold">Share Your Stories with the World</h1>
+                <p class="lead text-muted mb-4">A dedicated space for bloggers, poets, and article writers.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a href="{{ url_for('main.login_page') }}" class="btn btn-primary btn-lg px-4 gap-3">Login to Write</a>
+                    <a href="{{ url_for('main.register_page') }}" class="btn btn-outline-secondary btn-lg px-4">Join Hub</a>
+                </div>
+            </div>
         {% endif %}
+
     </div>
+</div>
 {% endblock %}
