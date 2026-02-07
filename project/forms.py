@@ -3,6 +3,8 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextA
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
 from .models import User
 
+
+
 class LoginForm(FlaskForm):
     """Form for user login."""
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -32,7 +34,8 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('That email is already in use. Please choose a different one.')
 
 class PostForm(FlaskForm):
-    """Form for creating a new post."""
+    """Fixed: Added author_name which was missing but used in template"""
     title = StringField('Title', validators=[DataRequired(), Length(min=1, max=150)])
-    body = TextAreaField('Write something...', validators=[DataRequired(), Length(min=1)], render_kw={"rows": 15})
-    submit = SubmitField('Post')
+    author_name = StringField('Author Name', validators=[DataRequired(), Length(max=100)])
+    body = TextAreaField('Content', validators=[DataRequired(), Length(min=1)], render_kw={"rows": 10})
+    submit = SubmitField('Publish Post')

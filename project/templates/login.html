@@ -1,25 +1,41 @@
 {% extends "base.html" %}
 
+{% block body_class %}auth-bg{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-6 mx-auto">
-        <div class="card p-4 shadow-sm">
-            <h2 class="text-center mb-4">Sign In</h2>
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" required>
+<div class="row align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="auth-card">
+            <h2 class="auth-title">Welcome Back</h2>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+
+                <div class="form-floating-custom">
+                    {{ form.email(class="form-control", placeholder="name@example.com") }}
+                    {{ form.email.label(class="form-label") }}
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" required>
+
+                <div class="form-floating-custom">
+                    {{ form.password(class="form-control", placeholder="Password") }}
+                    {{ form.password.label(class="form-label") }}
                 </div>
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Login</button>
+
+                <div class="mb-4 form-check">
+                    {{ form.remember_me(class="form-check-input") }}
+                    {{ form.remember_me.label(class="form-check-label") }}
+                </div>
+
+                <div class="d-grid mb-4">
+                    {{ form.submit(class="btn btn-auth") }}
                 </div>
             </form>
-            <hr>
-            <p class="text-center">New? <a href="{{ url_for('main.register_page') }}">Register here</a></p>
+
+            <div class="divider"></div>
+
+            <p class="text-center mb-0">
+                Don't have an account?
+                <a href="{{ url_for('main.register_page') }}" class="auth-link">Create one</a>
+            </p>
         </div>
     </div>
 </div>

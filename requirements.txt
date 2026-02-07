@@ -6,4 +6,5 @@ Flask-Migrate
 Werkzeug
 email-validator
 python-dotenv
-google-auth requests
+google-auth 
+requests

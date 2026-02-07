@@ -1,55 +1,57 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-md-10 col-lg-8 mx-auto">
-            <h2 class="mb-4">{{ title }}</h2>
-            <div class="p-4 form-card shadow-sm">
-                <form method="POST" action="" novalidate>
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="mb-3">
-                        {{ form.title.label(class="form-label") }}
-                        {{ form.title(class="form-control form-control-lg" + (" is-invalid" if form.title.errors else "")) }}
-                        {% if form.title.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.title.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-3">
-                        {{ form.body.label(class="form-label") }}
-                        {{ form.body(class="form-control" + (" is-invalid" if form.body.errors else "")) }}
-                        {% if form.body.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.body.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
+<div class="row">
+    <div class="col-md-10 col-lg-8 mx-auto">
+        <h2 class="mb-4 gradient-text text-center">Create New Post</h2>
+        <div class="glass-card">
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
 
-                    <div class="mb-3">
-                        {{ form.author_name.label(class="form-label") }}
-                        {{ form.author_name(class="form-control" + (" is-invalid" if form.body.errors else "")) }}
-                        {% if form.author_name.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.body.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+                <div class="form-floating-custom">
+                    {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""),
+                    placeholder="e.g. -The Snail") }}
+                    {{ form.title.label(class="form-label") }}
+                    {% if form.title.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.title.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
                     </div>
-                    
-                    
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-floating-custom">
+                    {{ form.author_name(class="form-control" + (" is-invalid" if form.author_name.errors else ""),
+                    placeholder="e.g. - Ruskin Bond ") }}
+                    {{ form.author_name.label(class="form-label") }}
+                    {% if form.author_name.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.author_name.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
                     </div>
-                </form>
-            </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-floating-custom">
+                    {{ form.body(class="form-control" + (" is-invalid" if form.body.errors else ""),
+                    placeholder="Write your content here...", style="height: 200px;", rows=10) }}
+                    {{ form.body.label(class="form-label") }}
+                    {% if form.body.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.body.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid mt-4">
+                    {{ form.submit(class="btn btn-auth btn-lg") }}
+                </div>
+            </form>
         </div>
     </div>
+</div>
 {% endblock %}
