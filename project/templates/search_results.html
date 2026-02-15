@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2 class="mb-4 gradient-text text-center">Search Results</h2>
+
+        {% if query %}
+        <p class="text-center text-muted mb-4">Showing results for "<strong>{{ query }}</strong>"</p>
+        {% endif %}
+
+        {% if users %}
+        <div class="glass-card p-0 overflow-hidden">
+            <div class="list-group list-group-flush bg-transparent">
+                {% for user in users %}
+                <a href="{{ url_for('main.user_posts', username=user.username) }}"
+                    class="list-group-item list-group-item-action bg-transparent border-0 py-3 px-4">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <h5 class="mb-1 text-primary fw-bold">{{ user.username }}</h5>
+                        <small class="text-muted">View Profile</small>
+                    </div>
+                    <p class="mb-1 text-muted small">{{ user.email }}</p>
+                </a>
+                {% if not loop.last %}
+                <hr class="m-0 border-secondary opacity-25">
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="glass-card text-center py-5">
+            <h4 class="text-muted">No users found.</h4>
+            <p>Try searching for a different username.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

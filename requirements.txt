@@ -7,4 +7,5 @@ Werkzeug
 email-validator
 python-dotenv
 google-auth 
+authlib>=1.3.0
 requests
