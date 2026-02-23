@@ -1,45 +1,46 @@
 {% extends "base.html" %}
 
+{% block title %}
+<title>{{ title }} - Writer's Hub</title>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-8 mx-auto">
-        <h2 class="mb-4 gradient-text text-center">Search Results</h2>
-
-        {% if query %}
-        <p class="text-center text-muted mb-4">Showing results for "<strong>{{ query }}</strong>"</p>
-        {% endif %}
+        <h2 class="mb-4 gradient-text text-center">{{ title }} of {{ user.username }}</h2>
 
         {% if users %}
         <div class="glass-card p-0 overflow-hidden">
             <div class="list-group list-group-flush bg-transparent">
-                {% for user in users %}
+                {% for list_user in users %}
                 <div
                     class="list-group-item bg-transparent border-0 py-3 px-4 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <img class="rounded-circle me-3"
-                            src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" alt="PFP"
+                            src="{{ url_for('static', filename='profile_pics/' + list_user.image_file) }}" alt="PFP"
                             style="width: 50px; height: 50px; object-fit: cover;">
                         <div>
-                            <h5 class="mb-1"><a href="{{ url_for('main.user_posts', username=user.username) }}"
-                                    class="text-primary fw-bold text-decoration-none">{{ user.username }}</a></h5>
-                            <p class="mb-1 text-muted small">{{ user.email }} • {{ user.followers.count() }} Followers
+                            <h5 class="mb-1"><a href="{{ url_for('main.user_posts', username=list_user.username) }}"
+                                    class="text-primary fw-bold text-decoration-none">{{ list_user.username }}</a></h5>
+                            <p class="mb-1 text-muted small">{{ list_user.email }} • {{ list_user.followers.count() }}
+                                Followers
                             </p>
                         </div>
                     </div>
-                    {% if current_user.is_authenticated and current_user.username != user.username %}
+                    {% if current_user.is_authenticated and current_user.username != list_user.username %}
                     <div class="d-flex align-items-center gap-2">
-                        {% if current_user.is_following(user) %}
-                        <form action="{{ url_for('main.unfollow', username=user.username) }}" method="POST">
+                        {% if current_user.is_following(list_user) %}
+                        <form action="{{ url_for('main.unfollow', username=list_user.username) }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <button type="submit" class="btn btn-sm btn-secondary">Unfollow</button>
                         </form>
                         {% else %}
-                        <form action="{{ url_for('main.follow', username=user.username) }}" method="POST">
+                        <form action="{{ url_for('main.follow', username=list_user.username) }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <button type="submit" class="btn btn-sm btn-auth">Follow</button>
                         </form>
                         {% endif %}
-                        <a href="{{ url_for('main.chat', username=user.username) }}"
+                        <a href="{{ url_for('main.chat', username=list_user.username) }}"
                             class="btn btn-sm btn-outline-primary">Message</a>
                     </div>
                     {% endif %}
@@ -52,8 +53,8 @@
         </div>
         {% else %}
         <div class="glass-card text-center py-5">
-            <h4 class="text-muted">No users found.</h4>
-            <p>Try searching for a different username.</p>
+            <h4 class="text-muted">No {{ title|lower }} found.</h4>
+            <p>Check back later.</p>
         </div>
         {% endif %}
     </div>

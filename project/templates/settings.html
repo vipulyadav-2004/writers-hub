@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2 class="auth-title mb-4">Account Settings</h2>
+
+        <!-- Authentication & Security Section -->
+        <div class="glass-card mb-5">
+            <h4 class="mb-3"><i class="bi bi-shield-lock me-2 text-primary"></i>Security & Authentication</h4>
+            <hr class="divider mt-0 mb-4">
+
+            {% if current_user.password_hash %}
+            <!-- Change Password Form (Only for non-Google accounts) -->
+            <form method="POST" action="">
+                {{ password_form.hidden_tag() }}
+                <input type="hidden" name="submit_password" value="1">
+
+                <h5 class="mb-3">Change Password</h5>
+                <div class="form-floating-custom mb-3">
+                    {{ password_form.current_password(class="form-control", placeholder="Current Password") }}
+                    {{ password_form.current_password.label(class="form-label") }}
+                </div>
+                <div class="form-floating-custom mb-3">
+                    {{ password_form.new_password(class="form-control", placeholder="New Password") }}
+                    {{ password_form.new_password.label(class="form-label") }}
+                    {% if password_form.new_password.errors %}
+                    <div class="text-danger small mt-1 pl-2">{{ password_form.new_password.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-floating-custom mb-4">
+                    {{ password_form.confirm_password(class="form-control", placeholder="Confirm Password") }}
+                    {{ password_form.confirm_password.label(class="form-label") }}
+                    {% if password_form.confirm_password.errors %}
+                    <div class="text-danger small mt-1 pl-2">{{ password_form.confirm_password.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                {{ password_form.submit(class="btn btn-primary px-4") }}
+            </form>
+            <hr class="divider my-4">
+            {% else %}
+            <div class="alert alert-info border-0 text-white bg-opacity-25"
+                style="background-color: rgba(59, 130, 246, 0.2);">
+                <i class="bi bi-info-circle me-2"></i> Your account is connected via Google. You do not need a password.
+            </div>
+            {% endif %}
+
+            <!-- Change Email Form -->
+            <form method="POST" action="">
+                {{ email_form.hidden_tag() }}
+                <input type="hidden" name="submit_email" value="1">
+
+                <h5 class="mb-3">Update Email Address</h5>
+                <div class="form-floating-custom mb-4">
+                    {{ email_form.email(class="form-control", placeholder="New Email") }}
+                    {{ email_form.email.label(class="form-label") }}
+                    {% if email_form.email.errors %}
+                    <div class="text-danger small mt-1 pl-2">{{ email_form.email.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                {{ email_form.submit(class="btn btn-secondary px-4") }}
+            </form>
+        </div>
+
+        <!-- Preferences Section -->
+        <div class="glass-card mb-5">
+            <h4 class="mb-3"><i class="bi bi-sliders me-2 text-primary"></i>Personal Preferences</h4>
+            <hr class="divider mt-0 mb-4">
+
+            <form method="POST" action="">
+                {{ prefs_form.hidden_tag() }}
+                <input type="hidden" name="submit_prefs" value="1">
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label text-muted mb-1">{{ prefs_form.msg_preference.label }}</label>
+                        {{ prefs_form.msg_preference(class="form-select bg-dark text-white border-secondary") }}
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label text-muted mb-1">{{ prefs_form.profile_visibility.label }}</label>
+                        {{ prefs_form.profile_visibility(class="form-select bg-dark text-white border-secondary") }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label text-muted mb-1">{{ prefs_form.feed_sorting.label }}</label>
+                        {{ prefs_form.feed_sorting(class="form-select bg-dark text-white border-secondary") }}
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label text-muted mb-1">{{ prefs_form.accent_color.label }}</label>
+                        {{ prefs_form.accent_color(class="form-select bg-dark text-white border-secondary") }}
+                    </div>
+                </div>
+
+                <div class="mb-3 form-check form-switch">
+                    {{ prefs_form.two_factor_enabled(class="form-check-input") }}
+                    {{ prefs_form.two_factor_enabled.label(class="form-check-label ms-2 text-white") }}
+                </div>
+
+                <div class="mb-4 form-check form-switch">
+                    {{ prefs_form.email_notif_enabled(class="form-check-input") }}
+                    {{ prefs_form.email_notif_enabled.label(class="form-check-label ms-2 text-white") }}
+                </div>
+
+                {{ prefs_form.submit(class="btn btn-primary px-4") }}
+            </form>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="glass-card border-danger border-opacity-50" style="background: rgba(220, 38, 38, 0.05);">
+            <h4 class="text-danger mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Danger Zone</h4>
+            <hr class="divider mt-0 mb-4 border-danger border-opacity-25">
+
+            <p class="text-white">Once you delete your account, there is no going back. All of your posts, messages,
+                likes, and comments will be permanently erased. Please be certain.</p>
+
+            <button class="btn btn-danger mt-2" data-bs-toggle="collapse" data-bs-target="#deleteFormCollapse">
+                Permanently Delete Account
+            </button>
+
+            <div class="collapse mt-4" id="deleteFormCollapse">
+                <form method="POST" action="">
+                    {{ delete_form.hidden_tag() }}
+                    <input type="hidden" name="submit_delete" value="1">
+
+                    <div class="form-floating-custom mb-3" style="max-width: 300px;">
+                        {{ delete_form.confirm_text(class="form-control border-danger border-opacity-50",
+                        placeholder="DELETE") }}
+                        {{ delete_form.confirm_text.label(class="form-label text-danger") }}
+                        {% if delete_form.confirm_text.errors %}
+                        <div class="text-danger small mt-1 pl-2">{{ delete_form.confirm_text.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    {{ delete_form.submit(class="btn btn-outline-danger") }}
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

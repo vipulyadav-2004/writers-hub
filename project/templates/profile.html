@@ -9,11 +9,96 @@
         <!-- User Header Card -->
         <div class="glass-card text-center py-5 mb-5">
             <h2 class="auth-title mb-4">User Profile</h2>
-            <div class="mb-4">
-                <div class="display-3 mb-3">👤</div>
-                <h3 class="gradient-text mb-2">{{ username }}</h3>
-                <p class="text-muted">{{ current_user.email }}</p>
-            </div>
+            <form method="POST" action="" enctype="multipart/form-data" id="profile-form">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-4">
+                    <div class="position-relative d-inline-block mb-3" style="width: 150px; height: 150px;">
+                        <img class="rounded-circle account-img" src="{{ image_file }}" alt="User Profile Picture"
+                            style="width: 150px; height: 150px; object-fit: cover;">
+
+                        {{ form.picture(class="d-none", id="picture-input",
+                        onchange="document.getElementById('profile-form').submit();") }}
+                        <label for="picture-input"
+                            class="position-absolute bg-white text-primary rounded-circle d-flex align-items-center justify-content-center shadow mb-0"
+                            style="bottom: 0px; left: 0px; width: 36px; height: 36px; cursor: pointer; border: 1px solid #ddd; z-index: 10;">
+                            <i class="bi bi-pencil-fill" style="font-size: 1rem;"></i>
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <h3 class="gradient-text mb-0 me-2 {% if form.username.errors %}d-none{% endif %}"
+                            id="username-display">{{ username }}</h3>
+                        <a href="javascript:void(0);"
+                            onclick="document.getElementById('username-display').classList.add('d-none'); document.getElementById('username-edit-container').classList.remove('d-none'); this.classList.add('d-none');"
+                            class="text-secondary {% if form.username.errors %}d-none{% endif %}"
+                            id="username-edit-icon" title="Edit Username">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+                    </div>
+
+                    <div id="username-edit-container"
+                        class="mb-3 d-flex justify-content-center align-items-center mx-auto {% if not form.username.errors %}d-none{% endif %}"
+                        style="max-width: 300px;">
+                        {{ form.username(class="form-control form-control-sm me-2" + (" is-invalid" if
+                        form.username.errors else "")) }}
+                        <button type="submit" class="btn btn-sm btn-success">Save</button>
+                        <button type="button" class="btn btn-sm btn-secondary ms-1"
+                            onclick="document.getElementById('username-edit-container').classList.add('d-none'); document.getElementById('username-display').classList.remove('d-none'); document.getElementById('username-edit-icon').classList.remove('d-none');">Cancel</button>
+                    </div>
+
+                    {% if current_user.email == 'vipulyadav0709@gmail.com' %}
+                    <div class="mb-2 mt-1">
+                        <span class="badge rounded-pill px-3 py-2"
+                            style="background: linear-gradient(135deg, #FFD700, #F7931A); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); border: 1px solid rgba(255,255,255,0.4); color: #000; display: inline-flex; align-items: center;">
+                            <i class="bi bi-patch-check-fill me-2" style="font-size: 1.1rem;"></i>
+                            <span class="fw-bold fs-6">Owner & Developer</span>
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    {% if form.username.errors %}
+                    <div class="text-danger small mb-3">
+                        {% for error in form.username.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if form.picture.errors %}
+                    <div class="text-danger small mb-3">
+                        {% for error in form.picture.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Removed email row entirely as it's not looking necessary or could be placed better -->
+                    <!-- In fact I will put it back but add counts underneath it -->
+                    <p class="text-muted">{{ current_user.email }}</p>
+
+                    <div class="d-flex justify-content-center gap-4 mt-3">
+                        <div class="text-center">
+                            <strong class="d-block text-black">{{ current_user.posts|length }}</strong>
+                            <span class="text-muted small">Posts</span>
+                        </div>
+                        <a href="{{ url_for('main.followers', username=current_user.username) }}"
+                            class="text-decoration-none" style="color: inherit;">
+                            <div class="text-center">
+                                <strong class="d-block text-black">{{ current_user.followers.count() }}</strong>
+                                <span class="text-muted small">Followers</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('main.following', username=current_user.username) }}"
+                            class="text-decoration-none" style="color: inherit;">
+                            <div class="text-center">
+                                <strong class="d-block text-black">{{ current_user.followed.count() }}</strong>
+                                <span class="text-muted small">Following</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </form>
+
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
                 <a href="{{ url_for('main.create_post') }}" class="btn btn-auth px-4">New Post</a>
                 <a href="{{ url_for('main.logout_page') }}" class="btn btn-outline-secondary px-4">Logout</a>
@@ -27,23 +112,85 @@
         <div class="glass-card mb-4">
             <h4 class="fw-bold mb-1">{{ post.title }}</h4>
             <p class="text-muted small mb-3">Published on {{ post.timestamp.strftime('%B %d, %Y') }}</p>
+            {% if post.image_file %}
+            <img src="{{ url_for('static', filename='post_pics/' + post.image_file) }}" alt="Post Image"
+                class="img-fluid rounded mb-3" style="max-height: 400px; width: 100%; object-fit: contain;">
+            {% endif %}
             <hr class="divider my-3">
             <p class="post-body">{{ post.body }}</p>
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div>
+            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-3">
+                <div class="d-flex gap-2">
+                    <form action="{{ url_for('main.like_post', post_id=post.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        {% set user_liked = False %}
+                        {% if current_user.is_authenticated %}
+                        {% set user_liked = post.likes.filter_by(user_id=current_user.id).first() %}
+                        {% endif %}
+                        <button type="submit" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2">
+                            {% if user_liked %}
+                            <i class="bi bi-heart-fill text-danger"></i>
+                            {% else %}
+                            <i class="bi bi-heart"></i>
+                            {% endif %}
+                            Like <span class="badge bg-secondary text-white ms-1">{{ post.likes.count() }}</span>
+                        </button>
+                    </form>
+                    <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2"
+                        data-bs-toggle="collapse" data-bs-target="#comments-{{ post.id }}">
+                        <i class="bi bi-chat-text"></i> Comment <span class="badge bg-secondary text-white ms-1">{{
+                            post.comments.count() }}</span>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2"
+                        onclick="navigator.clipboard.writeText('{{ request.url_root }}user/{{ post.author.username }}'); alert('Profile URL copied to clipboard!');">
+                        <i class="bi bi-share"></i> Share
+                    </button>
+                </div>
+
+                <div class="d-flex align-items-center flex-wrap gap-2 text-end">
                     {% if post.author == current_user %}
                     <a href="{{ url_for('main.update_post', post_id=post.id) }}"
-                        class="btn btn-sm btn-secondary me-1">Edit</a>
-                    <!-- Button trigger modal -->
-                    <button type="button" class="btn btn-danger btn-sm m-1" data-bs-toggle="modal"
-                        data-bs-target="#deleteModalProfile{{ post.id }}">
-                        Delete
-                    </button>
+                        class="btn btn-sm btn-secondary">Edit</a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#deleteModalProfile{{ post.id }}">Delete</button>
+                    {% endif %}
+
+                    {% if post.author_name %}
+                    <p class="text-muted fst-italic mb-0 ms-lg-2">- Attribution: {{ post.author_name }}</p>
                     {% endif %}
                 </div>
-                {% if post.author_name %}
-                <p class="text-muted fst-italic mb-0">- Attribution: {{ post.author_name }}</p>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="collapse mt-3" id="comments-{{ post.id }}">
+                <hr class="divider">
+                <h5 class="mb-3">Comments</h5>
+                {% if current_user.is_authenticated %}
+                <form action="{{ url_for('main.comment_post', post_id=post.id) }}" method="POST" class="mb-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div class="input-group">
+                        <input type="text" name="body" class="form-control" placeholder="Write a comment..." required>
+                        <button class="btn btn-primary" type="submit">Post</button>
+                    </div>
+                </form>
                 {% endif %}
+                <div class="comments-list">
+                    {% for comment in post.comments %}
+                    <div class="d-flex mb-3">
+                        <img src="{{ url_for('static', filename='profile_pics/' + comment.author.image_file) }}"
+                            class="rounded-circle me-3 mt-1" style="width: 32px; height: 32px; object-fit: cover;">
+                        <div class="glass-card flex-grow-1 p-3 m-0"
+                            style="border-radius: 1rem; box-shadow: none; background: rgba(0,0,0,0.1);">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>{{ comment.author.username }}</strong>
+                                <small class="text-muted">{{ comment.timestamp.strftime('%b %d, %H:%M') }}</small>
+                            </div>
+                            <p class="mb-0 small text-white">{{ comment.body }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted small">No comments yet. Be the first to comment!</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 

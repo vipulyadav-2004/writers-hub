@@ -1,31 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-    --primary-color: #818cf8;
-    --secondary-color: #6366f1;
-    --accent-color: #f472b6;
-    --text-color: #f3f4f6;
-    /* Light text for dark background */
-    --text-muted: #9ca3af;
-    --bg-gradient-start: #121212;
-    /* Soft black */
-    --bg-gradient-end: #1a1a1a;
-    /* Slightly lighter soft black */
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    /* Lesser opacity white */
+    --primary-color: #a855f7;
+    /* Vibrant Purple */
+    --secondary-color: #3b82f6;
+    /* Bright Blue */
+    --accent-color: #ec4899;
+    /* Hot Pink */
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+
+    /* Background gradients */
+    --bg-gradient-start: #020617;
+    /* Very deep slate */
+    --bg-gradient-mid: #0f172a;
+    --bg-gradient-end: #1e1b4b;
+    /* Deep indigo/purple */
+
+    /* Glass settings */
+    --glass-bg: rgba(30, 41, 59, 0.4);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-navbar-bg: rgba(18, 18, 18, 0.85);
-    /* Dark semi-transparent navbar */
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-    --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --glass-navbar-bg: rgba(2, 6, 23, 0.7);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+    --font-main: 'Outfit', system-ui, -apple-system, sans-serif;
 }
 
+/* Global Body Styling */
 body {
     font-family: var(--font-main);
     color: var(--text-color);
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
-    background-size: 200% 200%;
-    animation: gradientBG 15s ease infinite;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+    background-size: 300% 300%;
+    animation: gradientBG 20s ease infinite;
     background-attachment: fixed;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+    animation: pulseOrbs 15s alternate infinite;
 }
 
 @keyframes gradientBG {
@@ -42,6 +66,34 @@ body {
     }
 }
 
+@keyframes pulseOrbs {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+
+    100% {
+        transform: scale(1.1) translate(-2%, 2%);
+    }
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 /* Layout Utilities */
 .auth-bg {
     min-height: 100vh;
@@ -51,90 +103,13 @@ body {
     padding: 20px;
 }
 
-/* Navbar */
-.navbar-glass {
-    background: var(--glass-navbar-bg) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--glass-border);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-glass .navbar-brand {
-    font-weight: 800;
-    background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 1.5rem;
-}
-
-.navbar-glass .nav-link {
-    color: var(--text-color) !important;
-    font-weight: 600;
-    transition: color 0.2s;
-}
-
-.navbar-glass .nav-link:hover {
-    color: var(--secondary-color) !important;
-}
-
-.navbar-glass .nav-link.active {
-    color: var(--primary-color) !important;
-}
-
-/* Glassmorphism Cards */
-.glass-card {
-    background: #f4f6f8a4;
-    /* Light gray background */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    /* Lighter border for light card */
-    border-radius: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    padding: 2rem;
-    transition: transform 0.2s ease;
-    color: #111827;
-    /* Dark text for inside the card */
-}
-
-/* Ensure headings and text inside the light card are dark */
-.glass-card h1,
-.glass-card h2,
-.glass-card h3,
-.glass-card h4,
-.glass-card p,
-.glass-card .gradient-text {
-    color: #111827;
-}
-
-.glass-card .text-muted {
-    color: #4b5563 !important;
-    /* Darker gray for muted text on light bg */
-}
-
-.glass-card:hover {
-    transform: translateY(-2px);
-}
-
-/* Auth Card inherits from glass-card structure but specific for auth */
-.auth-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
-    border-radius: 1.5rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 450px;
-}
-
-/* Typography */
+/* Typography Overrides */
 h1,
 h2,
 h3,
+h4,
+h5,
+h6,
 .gradient-text {
     font-weight: 800;
     color: var(--text-color);
@@ -143,12 +118,130 @@ h3,
 
 .auth-title {
     margin-bottom: 2rem;
-    font-size: 2rem;
+    font-size: 2.25rem;
     text-align: center;
-    background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
+    background: linear-gradient(135deg, #a855f7, #ec4899);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #60a5fa, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Navbar */
+.navbar-glass {
+    background: var(--glass-navbar-bg) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-glass .navbar-brand {
+    font-weight: 800;
+    background: linear-gradient(to right, #60a5fa, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+.navbar-glass .nav-link {
+    color: var(--text-color) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+}
+
+.navbar-glass .nav-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #a855f7 !important;
+}
+
+/* Base Glassmorphism Cards */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    box-shadow: var(--glass-shadow);
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    color: var(--text-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+    transform: skewX(-20deg);
+    transition: 0.5s;
+}
+
+.glass-card:hover::before {
+    left: 150%;
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(168, 85, 247, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Adjustments for Bootstrap utilities inside global dark mode */
+.text-dark,
+.text-black,
+.text-secondary {
+    color: var(--text-color) !important;
+    /* Force all text to be light */
+}
+
+.bg-light {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.bg-white {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.text-muted,
+.text-black-50 {
+    color: var(--text-muted) !important;
+}
+
+.border,
+.border-bottom,
+.border-top {
+    border-color: var(--glass-border) !important;
+}
+
+/* Auth Card inherits from glass-card structure but specific for auth */
+.auth-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1.5rem;
+    box-shadow: var(--glass-shadow);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 450px;
 }
 
 /* Styled Inputs */
@@ -158,125 +251,173 @@ h3,
 }
 
 .form-control {
-    border: 2px solid #374151;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 1rem !important;
     font-size: 1rem;
-    transition: all 0.2s ease;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--text-color);
+    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    color: var(--text-color) !important;
 }
 
 .form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.3) !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .form-floating-custom .form-label {
     position: absolute;
     top: -0.75rem;
     left: 1rem;
-    background: var(--bg-gradient-start);
-    /* Match background roughly */
+    background: transparent;
     padding: 0 0.5rem;
     font-size: 0.875rem;
     color: var(--text-muted);
     font-weight: 500;
 }
 
+/* Alerts / Modals */
+.alert {
+    border-radius: 1rem;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    color: var(--text-color);
+}
+
+.modal-content {
+    background: #0f172a;
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--glass-border) !important;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
 /* Buttons */
 .btn-auth,
 .btn-primary {
-    background: linear-gradient(to right, var(--primary-color), var(--secondary-color)) !important;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
     border: none;
     border-radius: 0.75rem;
     padding: 0.75rem 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.025em;
     color: white !important;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
 }
 
 .btn-auth:hover,
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.6);
+    filter: brightness(1.1);
 }
 
 .btn-success {
-    background: linear-gradient(to right, #10b981, #059669) !important;
+    background: linear-gradient(135deg, #10b981, #059669) !important;
     border: none;
     border-radius: 0.75rem;
     padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 
 .btn-success:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: var(--text-color) !important;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
 }
 
 .btn-outline-secondary {
-    border: 2px solid var(--secondary-color);
-    color: var(--secondary-color);
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    color: var(--text-color) !important;
     border-radius: 0.75rem;
     font-weight: 600;
     background: transparent;
 }
 
 .btn-outline-secondary:hover {
-    background: var(--secondary-color);
-    color: white;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
 }
 
 /* Links */
 .auth-link,
 a {
-    color: var(--secondary-color);
+    color: var(--primary-color);
     text-decoration: none;
-    transition: color 0.2s;
+    transition: color 0.2s, text-shadow 0.2s;
 }
 
 a:hover {
     color: var(--accent-color);
+    text-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
 }
 
 .divider {
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin: 2rem 0;
 }
 
-/* Google Sign In Button & Separator */
+/* Google Sign In Button */
 .btn-google {
-    background: #ffffff !important;
-    color: #374151 !important;
-    border: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-color) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    position: relative;
-    /* Shared button properties */
     border-radius: 0.75rem;
     padding: 0.75rem 1.5rem;
     font-weight: 600;
-    letter-spacing: 0.025em;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    text-decoration: none;
-    /* Ensure link underline doesn't show */
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 .btn-google:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    background-color: #f9fafb !important;
-    color: #111827 !important;
-    /* Ensure text stays dark on hover */
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .auth-separator {
@@ -284,18 +425,39 @@ a:hover {
     align-items: center;
     text-align: center;
     margin: 1.5rem 0;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.3);
 }
 
 .auth-separator::before,
 .auth-separator::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .auth-separator span {
     padding: 0 1rem;
     font-size: 0.875rem;
     font-weight: 500;
+}
+
+/* Chat bubble overrides */
+.bg-body-tertiary {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-menu {
+    background-color: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--glass-shadow);
+}
+
+.dropdown-item {
+    color: var(--text-color);
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
 }

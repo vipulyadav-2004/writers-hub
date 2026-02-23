@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2 class="mb-4 gradient-text text-center">Messages</h2>
+
+        {% if chat_users %}
+        <div class="glass-card p-0 overflow-hidden">
+            <div class="list-group list-group-flush bg-transparent">
+                {% for chat in chat_users %}
+                <a href="{{ url_for('main.chat', username=chat.user.username) }}"
+                    class="list-group-item list-group-item-action bg-transparent border-0 py-3 px-4 text-decoration-none">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center text-truncate pe-3">
+                            <img class="rounded-circle me-3 flex-shrink-0"
+                                src="{{ url_for('static', filename='profile_pics/' + chat.user.image_file) }}" alt="PFP"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            <div class="text-truncate">
+                                <h5 class="mb-1 text-primary fw-bold">
+                                    {{ chat.user.username }}
+                                    {% set unread_count =
+                                    chat.user.messages_sent.filter_by(recipient_id=current_user.id,
+                                    is_read=False).count() %}
+                                    {% if unread_count > 0 %}
+                                    <span class="badge rounded-pill bg-danger ms-2" style="font-size: 0.6rem;">{{
+                                        unread_count }}</span>
+                                    {% endif %}
+                                </h5>
+                                <p
+                                    class="mb-0 text-muted small text-truncate fw-{% if unread_count > 0 %}bold text-white{% else %}normal{% endif %}">
+                                    {% if chat.last_message.sender_id == current_user.id %}
+                                    <span class="fst-italic opacity-75">You:</span>
+                                    {% endif %}
+                                    {{ chat.last_message.body }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-muted small text-nowrap flex-shrink-0">
+                            {{ chat.last_message.timestamp.strftime('%b %d, %H:%M') }}
+                        </div>
+                    </div>
+                </a>
+                {% if not loop.last %}
+                <hr class="m-0 border-secondary opacity-25">
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="glass-card text-center py-5">
+            <h4 class="text-muted">No messages yet.</h4>
+            <p>Go to a user's profile to start a chat.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

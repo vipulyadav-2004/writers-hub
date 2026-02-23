@@ -5,7 +5,7 @@
     <div class="col-md-10 col-lg-8 mx-auto">
         <h2 class="mb-4 gradient-text text-center">{{ legend }}</h2>
         <div class="glass-card">
-            <form method="POST" action="">
+            <form method="POST" action="" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
 
                 <div class="form-floating-custom">
@@ -44,14 +44,25 @@
                         <span>{{ error }}</span>
                         {% endfor %}
                     </div>
-                    {% endif %}
                 </div>
-
-                <div class="d-grid mt-4">
-                    {{ form.submit(class="btn btn-auth btn-lg") }}
-                </div>
-            </form>
+                {% endif %}
         </div>
+
+        <div class="mb-3 mt-3">
+            {{ form.picture.label() }}
+            {{ form.picture(class="form-control-file") }}
+            {% if form.picture.errors %}
+            {% for error in form.picture.errors %}
+            <span class="text-danger">{{ error }}</span></br>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="d-grid mt-4">
+            {{ form.submit(class="btn btn-auth btn-lg") }}
+        </div>
+        </form>
     </div>
+</div>
 </div>
 {% endblock %}

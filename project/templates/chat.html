@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="glass-card p-0 d-flex flex-column" style="height: 75vh; max-height: 800px;">
+            <div
+                class="bg-white bg-opacity-10 border-bottom border-secondary border-opacity-25 px-4 py-3 d-flex align-items-center">
+                <a href="{{ url_for('main.messages') }}" class="btn btn-sm btn-outline-secondary me-3">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <img class="rounded-circle me-3"
+                    src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" alt="PFP"
+                    style="width: 40px; height: 40px; object-fit: cover;">
+                <h5 class="mb-0 gradient-text"><a href="{{ url_for('main.user_posts', username=user.username) }}"
+                        class="text-decoration-none">{{ user.username }}</a></h5>
+            </div>
+
+            <div class="flex-grow-1 overflow-auto p-4 d-flex flex-column" id="chat-messages">
+                {% if chat_messages %}
+                {% for message in chat_messages %}
+                <div
+                    class="mb-3 d-flex flex-column {% if message.sender_id == current_user.id %}align-items-end{% else %}align-items-start{% endif %}">
+                    <div
+                        class="d-flex align-items-center {% if message.sender_id == current_user.id %}flex-row-reverse{% endif %}">
+                        <div class="p-3 shadow-sm rounded-4 {% if message.sender_id == current_user.id %}bg-primary text-white ms-2{% else %}bg-body-tertiary me-2{% endif %}"
+                            style="max-width: 85%;">
+                            {{ message.body }}
+                            {% if message.is_edited %}
+                            <small
+                                class="{% if message.sender_id == current_user.id %}text-black-50{% else %}text-muted{% endif %} ms-2"
+                                style="font-size: 0.65rem;">(edited)</small>
+                            {% endif %}
+                        </div>
+
+                        {% if message.sender_id == current_user.id %}
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-link text-muted p-0 border-0 ms-1 me-1 shadow-none"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width: 100px;">
+                                <li><a class="dropdown-item small msg-edit-btn" href="#" data-msgid="{{ message.id }}"
+                                        data-body="{{ message.body|e }}"
+                                        onclick="editMessage(this.dataset.msgid, this.dataset.body)">Edit</a></li>
+                                <li>
+                                    <form action="{{ url_for('main.delete_message', message_id=message.id) }}"
+                                        method="POST" onsubmit="return confirm('Delete this message?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                        <button type="submit" class="dropdown-item small text-danger">Delete</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <small class="text-muted mt-1 px-1 message-time"
+                        data-timestamp="{{ message.timestamp.isoformat() }}Z" style="font-size: 0.7rem;">
+                        {{ message.timestamp.strftime('%H:%M • %b %d') }}
+                    </small>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center text-muted my-auto">
+                    <p>No messages here yet. Say hi!</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white bg-opacity-10 border-top border-secondary border-opacity-25 p-3">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    <div class="input-group">
+                        {{ form.message(class="form-control bg-light text-dark shadow-none border-0 rounded-start-pill
+                        ps-4", placeholder="Type a message...", rows="1", style="resize:none;") }}
+                        <button class="btn btn-primary rounded-end-pill px-4" type="submit">
+                            <i class="bi bi-send-fill"></i> Send
+                        </button>
+                    </div>
+                    {% if form.message.errors %}
+                    {% for error in form.message.errors %}
+                    <div class="text-danger small ms-3 mt-1">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Message Modal -->
+<div class="modal fade" id="editMessageModal" tabindex="-1" aria-labelledby="editMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMessageModalLabel">Edit Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editMessageForm" method="POST" action="">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <div class="modal-body">
+                    <textarea class="form-control bg-light text-dark" name="body" id="editMessageBody" rows="3"
+                        required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editMessage(id, body) {
+        document.getElementById('editMessageBody').value = body;
+        document.getElementById('editMessageForm').action = "/message/" + id + "/edit";
+        var editModal = new bootstrap.Modal(document.getElementById('editMessageModal'));
+        editModal.show();
+    }
+
+    // Convert timestamps to local time and Auto-scroll
+    document.addEventListener("DOMContentLoaded", function () {
+        var chatBox = document.getElementById("chat-messages");
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        document.querySelectorAll('.message-time').forEach(el => {
+            const d = new Date(el.dataset.timestamp);
+            if (!isNaN(d)) {
+                el.innerText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            }
+        });
+    });
+</script>
+{% endblock %}

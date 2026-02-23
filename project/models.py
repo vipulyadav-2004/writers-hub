@@ -3,6 +3,12 @@ from project import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# Association table for followers
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 # User model for the database
 # UserMixin provides default implementations for Flask-Login requirements
 class User(UserMixin, db.Model):
@@ -10,11 +16,63 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256)) # Increased length for stronger hashes
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg', server_default='default.jpg')
     
     # Relationship: A user can have many posts
     # 'backref' adds a '.author' attribute to the Post model
     # 'lazy=True' means SQLAlchemy will load the data as needed
     posts = db.relationship('Post', backref='author', lazy=True)
+    likes = db.relationship('Like', backref='user', lazy='dynamic', cascade="all, delete-orphan")
+    comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+
+    # Preferences settings
+    msg_preference = db.Column(db.String(20), default='everyone') # everyone, followers, none
+    profile_visibility = db.Column(db.String(20), default='public') # public, private
+    two_factor_enabled = db.Column(db.Boolean, default=False)
+    email_notif_enabled = db.Column(db.Boolean, default=True)
+    feed_sorting = db.Column(db.String(20), default='latest') # latest, popular
+    accent_color = db.Column(db.String(20), default='purple')
+
+    # Followers relationship
+    followed = db.relationship(
+        'User', secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+        
+    messages_sent = db.relationship('Message',
+                                    foreign_keys='Message.sender_id',
+                                    backref='author', lazy='dynamic')
+    messages_received = db.relationship('Message',
+                                        foreign_keys='Message.recipient_id',
+                                        backref='recipient', lazy='dynamic')
+    notifications = db.relationship('Notification', backref='user', lazy='dynamic', cascade="all, delete-orphan")
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+
+    def is_following(self, user):
+        return self.followed.filter(
+            followers.c.followed_id == user.id).count() > 0
+
+    def followed_posts(self):
+        followed = Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+        own = Post.query.filter_by(user_id=self.id)
+        return followed.union(own).order_by(Post.timestamp.desc())
+
+    def get_recent_notifications(self, limit=10):
+        # We can safely order_by text inside the model file imported components
+        return self.notifications.order_by(db.desc('timestamp')).limit(limit).all()
+
+    def new_messages(self):
+        return Message.query.filter_by(recipient=self, is_read=False).count()
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -33,10 +91,56 @@ class Post(db.Model):
     title = db.Column(db.String(150), nullable=False)
     body = db.Column(db.Text, nullable=False)
     author_name = db.Column(db.String(100), nullable=False)
+    image_file = db.Column(db.String(20), nullable=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     
     # Foreign key to link posts to users
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    likes = db.relationship('Like', backref='post', lazy='dynamic', cascade="all, delete-orphan")
+    comments = db.relationship('Comment', backref='post', lazy='dynamic', cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<Post {self.title}>'
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    is_edited = db.Column(db.Boolean, default=False)
+    is_read = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return f'<Message {self.body}>'
+
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Like user:{self.user_id} post:{self.post_id}>'
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Comment {self.body[:20]}>'
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    link = db.Column(db.String(255), nullable=True) # URL to redirect to when clicked
+    is_read = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Notification {self.message[:20]}>'
