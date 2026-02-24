@@ -83,7 +83,16 @@
                     style="width: 25px; height: 25px; object-fit: cover;">
                 <a href="{{ url_for('main.user_posts', username=post.author.username) }}"
                     class="text-decoration-none text-dark"><strong>{{ post.author.username }}</strong></a>
-                on {{ post.timestamp.strftime('%B %d, %Y') }}
+                {% if current_user.is_authenticated and current_user != post.author and not
+                current_user.is_following(post.author) %}
+            <form action="{{ url_for('main.follow', username=post.author.username) }}" method="POST"
+                class="d-inline ms-1 me-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="badge rounded-pill border-0 shadow-sm px-2 py-1"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer; font-size: 0.65rem;">Follow</button>
+            </form>
+            {% endif %}
+            <span class="ms-1">on {{ post.timestamp.strftime('%B %d, %Y') }}</span>
             </p>
             {% if post.image_file %}
             <img src="{{ url_for('static', filename='post_pics/' + post.image_file) }}" alt="Post Image"
