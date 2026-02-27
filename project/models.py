@@ -17,6 +17,24 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256)) # Increased length for stronger hashes
     image_file = db.Column(db.String(500), nullable=False, default='default.jpg', server_default='default.jpg')
+    is_verified = db.Column(db.Boolean, default=False)
+    
+    def get_verification_token(self, expires_sec=1800):
+        from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
+        from flask import current_app
+        s = Serializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+
+    @staticmethod
+    def verify_token(token):
+        from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
+        from flask import current_app
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, max_age=1800)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
     
     # Relationship: A user can have many posts
     # 'backref' adds a '.author' attribute to the Post model

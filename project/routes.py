@@ -1,15 +1,29 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, abort, current_app
 from flask_login import login_user, logout_user, current_user, login_required
 from sqlalchemy import or_, and_
-from project.models import User, Post, Message, Like, Comment, Notification
+from project.models import User, Post, Message as DBMessage, Like, Comment, Notification
 from project.forms import LoginForm, RegistrationForm, PostForm, UpdateProfileForm, MessageForm, UpdatePasswordForm, UpdateEmailForm, DeleteAccountForm, PreferencesForm
-from project import db, oauth
+from project import db, oauth, mail
+from flask_mail import Message
 from flask_wtf.csrf import CSRFError
 import secrets
 import os
 from PIL import Image
 
 main = Blueprint('main', __name__)
+
+def send_verification_email(user):
+    token = user.get_verification_token()
+    msg = Message('Verify Your Email - Writer\'s Hub',
+                  recipients=[user.email])
+    verify_url = url_for('main.verify_token_route', token=token, _external=True)
+    msg.body = f'''To verify your Writer's Hub account, simply click the link below:
+
+{verify_url}
+
+If you did not request this account, you can safely ignore this email and nothing will occur.
+'''
+    mail.send(msg)
 
 @main.app_context_processor
 def inject_image_helper():
@@ -89,15 +103,36 @@ def register_page():
     form = RegistrationForm() # Step 1: Initialize the form
     
     if form.validate_on_submit(): # Step 2: Use validate_on_submit
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(username=form.username.data, email=form.email.data, is_verified=False)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Registration successful! Please login.', 'success')
+        
+        try:
+            send_verification_email(user)
+            flash('Registration successful! An email has been sent to verify your account.', 'info')
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+            flash('Registration successful! However, we could not send the verification email. Please contact support.', 'warning')
+            
         return redirect(url_for('main.login_page'))
     
     # Step 3: Pass form=form to the template
     return render_template('register.html', form=form)
+
+@main.route("/verify_email/<token>")
+def verify_token_route(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('main.main_page'))
+    user = User.verify_token(token)
+    if user is None:
+        flash('That is an invalid or expired verification link.', 'warning')
+        return redirect(url_for('main.login_page'))
+    
+    user.is_verified = True
+    db.session.commit()
+    flash('Your account has been verified successfully! You may now log in.', 'success')
+    return redirect(url_for('main.login_page'))
 
 @main.route("/login", methods=['GET', 'POST'])
 def login_page():
@@ -108,6 +143,9 @@ def login_page():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
+            if not getattr(user, 'is_verified', True):
+                flash('Please check your email and click the verification link before logging in.', 'warning')
+                return redirect(url_for('main.login_page'))
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for('main.profile_page'))
         else:
@@ -155,6 +193,7 @@ def google_authorize():
         user = User(
             username=username,
             email=email,
+            is_verified=True
             # password_hash is optional/nullable, so we can leave it empty
             # or set a random unguessable password if desired
         )
@@ -162,6 +201,10 @@ def google_authorize():
         db.session.commit()
         flash('Account created via Google!', 'success')
     else:
+        # Guarantee existing Google users are verified retroactively
+        if not getattr(user, 'is_verified', True):
+            user.is_verified = True
+            db.session.commit()
         flash('Logged in via Google!', 'success')
 
     login_user(user)
