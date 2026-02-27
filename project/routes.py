@@ -299,7 +299,14 @@ def profile_page():
 
     # Fetch only posts belonging to the logged-in user
     user_posts = Post.query.filter_by(author=current_user).order_by(Post.timestamp.desc()).all()
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file) if current_user.image_file else url_for('static', filename='profile_pics/default.jpg')
+    
+    # Check if Cloudinary HTTP or Local Default
+    if current_user.image_file and current_user.image_file.startswith('http'):
+        image_file = current_user.image_file
+    else:
+        img_fn = current_user.image_file if current_user.image_file else 'default.jpg'
+        image_file = url_for('static', filename='profile_pics/' + img_fn)
+        
     return render_template('profile.html', username=current_user.username, posts=user_posts, form=form, image_file=image_file)
 
 @main.route('/settings', methods=['GET', 'POST'])
