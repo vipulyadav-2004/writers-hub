@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256)) # Increased length for stronger hashes
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg', server_default='default.jpg')
+    image_file = db.Column(db.String(500), nullable=False, default='default.jpg', server_default='default.jpg')
     
     # Relationship: A user can have many posts
     # 'backref' adds a '.author' attribute to the Post model
@@ -119,7 +119,7 @@ class Post(db.Model):
     title = db.Column(db.String(150), nullable=False)
     body = db.Column(db.Text, nullable=False)
     author_name = db.Column(db.String(100), nullable=False)
-    image_file = db.Column(db.String(20), nullable=True)
+    image_file = db.Column(db.String(500), nullable=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     
     # Foreign key to link posts to users
@@ -139,7 +139,7 @@ class Message(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     is_edited = db.Column(db.Boolean, default=False)
     is_read = db.Column(db.Boolean, default=False)
-    image_file = db.Column(db.String(20), nullable=True)
+    image_file = db.Column(db.String(500), nullable=True)
     shared_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
 
     shared_post = db.relationship('Post', foreign_keys=[shared_post_id], backref='shared_in_messages')
