@@ -46,6 +46,7 @@ class User(UserMixin, db.Model):
     posts = db.relationship('Post', backref='author', lazy=True)
     likes = db.relationship('Like', backref='user', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade="all, delete-orphan")
+    saved_posts = db.relationship('SavedPost', backref='user', lazy='dynamic', cascade="all, delete-orphan")
 
     # Preferences settings
     msg_preference = db.Column(db.String(20), default='everyone') # everyone, followers, none
@@ -149,6 +150,7 @@ class Post(db.Model):
     
     likes = db.relationship('Like', backref='post', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='post', lazy='dynamic', cascade="all, delete-orphan")
+    saved_by = db.relationship('SavedPost', backref='post', lazy='dynamic', cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<Post {self.title}>'
@@ -198,3 +200,12 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f'<Notification {self.message[:20]}>'
+
+class SavedPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<SavedPost user:{self.user_id} post:{self.post_id}>'

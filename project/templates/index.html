@@ -138,6 +138,21 @@
                         <i class="bi bi-chat-text"></i> Comment <span class="badge bg-secondary text-white ms-1">{{
                             post.comments.count() }}</span>
                     </button>
+                    <form action="{{ url_for('main.save_post', post_id=post.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        {% set user_saved = False %}
+                        {% if current_user.is_authenticated %}
+                        {% set user_saved = post.saved_by.filter_by(user_id=current_user.id).first() %}
+                        {% endif %}
+                        <button type="submit" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2">
+                            {% if user_saved %}
+                            <i class="bi bi-bookmark-fill text-warning"></i>
+                            {% else %}
+                            <i class="bi bi-bookmark"></i>
+                            {% endif %}
+                            Save
+                        </button>
+                    </form>
                     <div class="dropdown d-inline">
                         <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 dropdown-toggle"
                             type="button" data-bs-toggle="dropdown" aria-expanded="false">

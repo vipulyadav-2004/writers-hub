@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, abort, current_app
 from flask_login import login_user, logout_user, current_user, login_required
 from sqlalchemy import or_, and_
-from project.models import User, Post, Message as DBMessage, Like, Comment, Notification
+from project.models import User, Post, Message as DBMessage, Like, Comment, Notification, SavedPost
 from project.forms import LoginForm, RegistrationForm, PostForm, UpdateProfileForm, MessageForm, UpdatePasswordForm, UpdateEmailForm, DeleteAccountForm, PreferencesForm
 from project import db, oauth, mail
 from flask_mail import Message
@@ -320,6 +320,24 @@ def comment_post(post_id):
         
     return redirect(request.referrer or url_for('main.main_page'))
 
+@main.route('/post/<int:post_id>/save', methods=['POST'])
+@login_required
+def save_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    saved_post = SavedPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+    
+    if saved_post:
+        db.session.delete(saved_post)
+        db.session.commit()
+        flash('Post removed from saved posts.', 'info')
+    else:
+        new_save = SavedPost(user_id=current_user.id, post_id=post_id)
+        db.session.add(new_save)
+        db.session.commit()
+        flash('Post saved successfully!', 'success')
+        
+    return redirect(request.referrer or url_for('main.main_page'))
+
 @main.route('/logout')
 @login_required
 def logout_page():
@@ -353,7 +371,10 @@ def profile_page():
         img_fn = current_user.image_file if current_user.image_file else 'default.jpg'
         image_file = url_for('static', filename='profile_pics/' + img_fn)
         
-    return render_template('profile.html', username=current_user.username, posts=user_posts, form=form, image_file=image_file)
+    # Fetch saved posts
+    saved_posts = Post.query.join(SavedPost).filter(SavedPost.user_id == current_user.id).order_by(SavedPost.timestamp.desc()).all()
+        
+    return render_template('profile.html', username=current_user.username, posts=user_posts, form=form, image_file=image_file, saved_posts=saved_posts)
 
 @main.route('/settings', methods=['GET', 'POST'])
 @login_required
