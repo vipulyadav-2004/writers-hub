@@ -299,6 +299,122 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Global Client-Side Image Compression Script for Vercel Payload Restrictions -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+
+      fileInputs.forEach(input => {
+        // Find if this input auto-submits by checking its inline onchange attribute
+        const onchangeAttr = input.getAttribute('onchange');
+        const hasAutoSubmit = onchangeAttr && onchangeAttr.includes('submit()');
+
+        if (hasAutoSubmit) {
+          // Remove the inline onchange so it doesn't trigger prematurely before compression
+          input.removeAttribute('onchange');
+        }
+
+        const form = input.closest('form');
+        let submitBtn = null;
+        if (form) {
+          // Find primary submit button
+          submitBtn = form.querySelector('[type="submit"]') || form.querySelector('button:not([type="button"])');
+        }
+
+        input.addEventListener('change', async function (e) {
+          const file = e.target.files[0];
+          if (!file || !file.type.startsWith('image/')) {
+            if (hasAutoSubmit && file) { form.submit(); }
+            return;
+          }
+
+          // Only compress if file is over ~1MB (1,048,576 bytes) to bypass Vercel 4.5MB limits safely
+          if (file.size > 1024 * 1024) {
+            try {
+              // Lock submit button to prevent sending massive file halfway through compression
+              let originalBtnText = '';
+              if (submitBtn) {
+                originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Compressing...';
+              }
+
+              // Try locking visual picture labels if it exists for auto-submits (like Profile Page PFP input)
+              const label = document.querySelector(`label[for="${input.id}"]`);
+              let originalLabelHTML = '';
+              if (label && hasAutoSubmit) {
+                originalLabelHTML = label.innerHTML;
+                label.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"></div>';
+              }
+
+              const compressedFile = await compressImage(file);
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(compressedFile);
+              input.files = dataTransfer.files; // Overwrite memory
+
+              // Restore UI Elements
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+              }
+              if (label && hasAutoSubmit) label.innerHTML = originalLabelHTML;
+
+            } catch (err) {
+              console.error("Image Compression failed", err);
+              if (submitBtn) submitBtn.disabled = false;
+            }
+          }
+
+          // If the form relied on auto-submit, manually trigger it now!
+          if (hasAutoSubmit) {
+            if (form) form.submit();
+          }
+        });
+      });
+
+      // Async Compression Promise Driver
+      function compressImage(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = event => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              const MAX_DIMENSION = 1400; // Cap large dimensions
+
+              if (width > height && width > MAX_DIMENSION) {
+                height *= MAX_DIMENSION / width;
+                width = MAX_DIMENSION;
+              } else if (height > MAX_DIMENSION) {
+                width *= MAX_DIMENSION / height;
+                height = MAX_DIMENSION;
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Output logic as high-quality JPEG
+              canvas.toBlob(blob => {
+                resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                  type: 'image/jpeg',
+                  lastModified: Date.now()
+                }));
+              }, 'image/jpeg', 0.85); // 85% visual compression
+            };
+            img.onerror = reject;
+          };
+          reader.onerror = reject;
+        });
+      }
+    });
+  </script>
+
   {% if current_user.is_authenticated %}
   <script>
     function markNotificationsRead() {
