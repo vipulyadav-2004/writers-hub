@@ -27,7 +27,14 @@
   </style>
 </head>
 
-<body class="{% block body_class %}{% endblock %}">
+<body class="loading-active {% block body_class %}{% endblock %}">
+  <!-- Global Page Loading Overlay -->
+  <div id="page-loader" class="page-loader-wrapper">
+    <div class="spinner-border loader-spinner" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
   {% if request.endpoint != 'main.login_page' and request.endpoint != 'main.register_page' %}
   <nav class="navbar navbar-expand-lg navbar-glass navbar-dark mb-4 sticky-top">
     <div class="container">
@@ -412,6 +419,45 @@
           reader.onerror = reject;
         });
       }
+    });
+
+    // --- Loading UI Animations ---
+
+    // 1. Hide full screen loader gracefully when the page completely paints
+    window.addEventListener('load', function () {
+      const loader = document.getElementById('page-loader');
+      if (loader) {
+        loader.classList.add('fade-out');
+        document.body.classList.remove('loading-active');
+        setTimeout(() => {
+          loader.style.display = 'none';
+        }, 300); // Wait for CSS transition to complete
+      }
+    });
+
+    // 2. Intercept All Standard Forms to instantly show spinners on submit
+    document.addEventListener("DOMContentLoaded", function () {
+      const forms = document.querySelectorAll("form");
+      forms.forEach(form => {
+        form.addEventListener("submit", function (e) {
+          if (form.getAttribute('data-prevent-loader') === 'true') return;
+
+          const submitBtn = form.querySelector('[type="submit"]') || form.querySelector('button:not([type="button"])');
+          if (submitBtn && !submitBtn.disabled) {
+            // Don't override if the Image Compression script is already loading the button
+            if (!submitBtn.innerHTML.includes('spinner-border')) {
+              if (submitBtn.innerHTML.includes('bi-search')) {
+                // Search Button
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+              } else {
+                // Standard Button String
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
+              }
+              submitBtn.classList.add('opacity-75', 'pe-none'); // Lock interaction
+            }
+          }
+        });
+      });
     });
   </script>
 

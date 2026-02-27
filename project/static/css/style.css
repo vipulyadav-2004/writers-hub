@@ -461,3 +461,36 @@ a:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
 }
+
+/* Global Loading Animation Overlays */
+.page-loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-gradient-mid);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.page-loader-wrapper.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-spinner {
+    width: 3rem;
+    height: 3rem;
+    color: var(--primary-color) !important;
+}
+
+/* Make body hide overflow during loading to prevent scrolling */
+body.loading-active {
+    overflow: hidden;
+}
