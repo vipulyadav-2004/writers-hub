@@ -427,6 +427,9 @@ def chat(username):
     form = MessageForm()
     if form.validate_on_submit():
         msg = Message(author=current_user, recipient=user, body=form.message.data)
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data, 'message_pics')
+            msg.image_file = picture_file
         db.session.add(msg)
         db.session.commit()
         return redirect(url_for('main.chat', username=username))
@@ -476,6 +479,33 @@ def delete_message(message_id):
     db.session.commit()
     flash('Message deleted.', 'success')
     return redirect(request.referrer or url_for('main.messages'))
+
+@main.route("/share_post/<int:post_id>", methods=['POST'])
+@login_required
+def share_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    recipient_username = request.form.get('recipient')
+    message_text = request.form.get('message_text', '')
+    
+    recipient = User.query.filter_by(username=recipient_username).first()
+    if not recipient:
+        flash('User not found to share with.', 'danger')
+        return redirect(request.referrer or url_for('main.main_page'))
+        
+    if recipient == current_user:
+        flash('You cannot share a post with yourself.', 'warning')
+        return redirect(request.referrer or url_for('main.main_page'))
+
+    msg = Message(
+        author=current_user,
+        recipient=recipient,
+        body=message_text,
+        shared_post_id=post.id
+    )
+    db.session.add(msg)
+    db.session.commit()
+    flash(f'Post successfully shared with {recipient.username}!', 'success')
+    return redirect(request.referrer or url_for('main.main_page'))
 
 @main.route("/notifications/read", methods=['POST'])
 @login_required

@@ -25,10 +25,34 @@
                         class="d-flex align-items-center {% if message.sender_id == current_user.id %}flex-row-reverse{% endif %}">
                         <div class="p-3 shadow-sm rounded-4 {% if message.sender_id == current_user.id %}bg-primary text-white ms-2{% else %}bg-body-tertiary me-2{% endif %}"
                             style="max-width: 85%;">
+                            {% if message.image_file %}
+                            <img src="{{ url_for('static', filename='message_pics/' + message.image_file) }}"
+                                class="img-fluid rounded mb-2" style="max-height: 250px;">
+                            {% endif %}
+                            {% if message.shared_post %}
+                            <div class="card mb-2 {% if message.sender_id == current_user.id %}bg-light text-dark{% else %}bg-white text-dark{% endif %}"
+                                style="border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <div class="card-body p-2 d-flex flex-column align-items-start text-start">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <img class="rounded-circle me-2"
+                                            src="{{ url_for('static', filename='profile_pics/' + message.shared_post.author.image_file) }}"
+                                            style="width: 20px; height: 20px; object-fit: cover;">
+                                        <span class="small fw-bold">{{ message.shared_post.author.username }}</span>
+                                    </div>
+                                    <h6 class="card-title fw-bold mb-1 text-truncate" style="max-width: 100%;">{{
+                                        message.shared_post.title }}</h6>
+                                    <a href="{{ url_for('main.user_posts', username=message.shared_post.author.username) }}"
+                                        class="btn btn-sm btn-outline-primary mt-1" style="font-size: 0.75rem;">View
+                                        Post</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if message.body %}
                             {{ message.body }}
+                            {% endif %}
                             {% if message.is_edited %}
                             <small
-                                class="{% if message.sender_id == current_user.id %}text-black-50{% else %}text-muted{% endif %} ms-2"
+                                class="{% if message.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %} ms-2"
                                 style="font-size: 0.65rem;">(edited)</small>
                             {% endif %}
                         </div>
@@ -69,17 +93,29 @@
             </div>
 
             <div class="bg-white bg-opacity-10 border-top border-secondary border-opacity-25 p-3">
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
                     <div class="input-group">
-                        {{ form.message(class="form-control bg-light text-dark shadow-none border-0 rounded-start-pill
-                        ps-4", placeholder="Type a message...", rows="1", style="resize:none;") }}
+                        <label class="btn btn-secondary rounded-start-pill d-flex align-items-center mb-0 px-3"
+                            style="cursor: pointer;">
+                            <i class="bi bi-image"></i>
+                            {{ form.picture(style="display: none;", id="picture-upload",
+                            onchange="updateFileName(this)") }}
+                        </label>
+                        {{ form.message(class="form-control bg-light text-dark shadow-none border-0 ps-3",
+                        placeholder="Type a message...", rows="1", style="resize:none;") }}
                         <button class="btn btn-primary rounded-end-pill px-4" type="submit">
                             <i class="bi bi-send-fill"></i> Send
                         </button>
                     </div>
+                    <div id="file-name-display" class="small text-muted ms-3 mt-1" style="display: none;"></div>
                     {% if form.message.errors %}
                     {% for error in form.message.errors %}
+                    <div class="text-danger small ms-3 mt-1">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                    {% if form.picture.errors %}
+                    {% for error in form.picture.errors %}
                     <div class="text-danger small ms-3 mt-1">{{ error }}</div>
                     {% endfor %}
                     {% endif %}
@@ -132,5 +168,16 @@
             }
         });
     });
+
+    function updateFileName(input) {
+        var display = document.getElementById('file-name-display');
+        if (input.files && input.files[0]) {
+            display.innerText = 'Attached Image: ' + input.files[0].name;
+            display.style.display = 'block';
+        } else {
+            display.style.display = 'none';
+            display.innerText = '';
+        }
+    }
 </script>
 {% endblock %}

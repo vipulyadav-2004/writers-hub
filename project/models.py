@@ -74,6 +74,34 @@ class User(UserMixin, db.Model):
     def new_messages(self):
         return Message.query.filter_by(recipient=self, is_read=False).count()
 
+    def get_top_chat_users(self, limit=10):
+        messages = Message.query.filter(
+            db.or_(Message.sender_id == self.id, Message.recipient_id == self.id)
+        ).all()
+        
+        counts = {}
+        for msg in messages:
+            other_id = msg.recipient_id if msg.sender_id == self.id else msg.sender_id
+            counts[other_id] = counts.get(other_id, 0) + 1
+            
+        sorted_user_ids = sorted(counts, key=counts.get, reverse=True)[:limit]
+        
+        # Fill remaining slots with followers
+        if len(sorted_user_ids) < limit:
+            followers = self.followers.all()
+            for f in followers:
+                if f.id not in sorted_user_ids and f.id != self.id:
+                    sorted_user_ids.append(f.id)
+                if len(sorted_user_ids) >= limit:
+                    break
+                    
+        if not sorted_user_ids:
+            return []
+            
+        users = User.query.filter(User.id.in_(sorted_user_ids)).all()
+        users_dict = {user.id: user for user in users}
+        return [users_dict[uid] for uid in sorted_user_ids if uid in users_dict]
+
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -107,13 +135,17 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    body = db.Column(db.String(140))
+    body = db.Column(db.String(500))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     is_edited = db.Column(db.Boolean, default=False)
     is_read = db.Column(db.Boolean, default=False)
+    image_file = db.Column(db.String(20), nullable=True)
+    shared_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
+
+    shared_post = db.relationship('Post', foreign_keys=[shared_post_id], backref='shared_in_messages')
 
     def __repr__(self):
-        return f'<Message {self.body}>'
+        return f'<Message {self.id}>'
 
 class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)

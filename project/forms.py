@@ -47,9 +47,21 @@ class UpdateProfileForm(FlaskForm):
             if user:
                 raise ValidationError('That username is already taken. Please choose a different one.')
 
+from wtforms.validators import Optional
+
 class MessageForm(FlaskForm):
-    message = TextAreaField('Message', validators=[DataRequired(), Length(min=1, max=140)])
+    message = TextAreaField('Message', validators=[Optional(), Length(max=500)])
+    picture = FileField('Upload Image', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
     submit = SubmitField('Send')
+
+    def validate(self, *args, **kwargs):
+        initial_validation = super(MessageForm, self).validate(*args, **kwargs)
+        if not initial_validation:
+            return False
+        if not self.message.data and not self.picture.data:
+            self.message.errors.append('You must provide a message or an image.')
+            return False
+        return True
 
 
 class UpdatePasswordForm(FlaskForm):
