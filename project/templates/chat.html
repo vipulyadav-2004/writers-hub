@@ -10,7 +10,7 @@
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <img class="rounded-circle me-3"
-                    src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" alt="PFP"
+                    src="{{ get_image_url(user.image_file, 'profile_pics') }}" alt="PFP"
                     style="width: 40px; height: 40px; object-fit: cover;">
                 <h5 class="mb-0 gradient-text"><a href="{{ url_for('main.user_posts', username=user.username) }}"
                         class="text-decoration-none">{{ user.username }}</a></h5>
@@ -26,7 +26,7 @@
                         <div class="p-3 shadow-sm rounded-4 {% if message.sender_id == current_user.id %}bg-primary text-white ms-2{% else %}bg-body-tertiary me-2{% endif %}"
                             style="max-width: 85%;">
                             {% if message.image_file %}
-                            <img src="{{ url_for('static', filename='message_pics/' + message.image_file) }}"
+                            <img src="{{ get_image_url(message.image_file, 'message_pics') }}"
                                 class="img-fluid rounded mb-2" style="max-height: 250px;">
                             {% endif %}
                             {% if message.shared_post %}
@@ -35,7 +35,7 @@
                                 <div class="card-body p-2 d-flex flex-column align-items-start text-start">
                                     <div class="d-flex align-items-center mb-1">
                                         <img class="rounded-circle me-2"
-                                            src="{{ url_for('static', filename='profile_pics/' + message.shared_post.author.image_file) }}"
+                                            src="{{ get_image_url(message.shared_post.author.image_file, 'profile_pics') }}"
                                             style="width: 20px; height: 20px; object-fit: cover;">
                                         <span class="small fw-bold">{{ message.shared_post.author.username }}</span>
                                     </div>

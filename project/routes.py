@@ -11,6 +11,17 @@ from PIL import Image
 
 main = Blueprint('main', __name__)
 
+@main.app_context_processor
+def inject_image_helper():
+    def get_image_url(image_file, folder):
+        if not image_file:
+            # Fallback if somehow empty
+            return url_for('static', filename=f"{folder}/default.jpg") if folder == 'profile_pics' else ''
+        if image_file.startswith('http'):
+            return image_file
+        return url_for('static', filename=f"{folder}/{image_file}")
+    return dict(get_image_url=get_image_url)
+
 @main.errorhandler(CSRFError)
 def handle_csrf_error(e):
     flash('Security token missing or invalid. Please try again.', 'danger')

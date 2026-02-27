@@ -10,7 +10,7 @@
             <h2 class="auth-title mb-3">Profile</h2>
             <div class="mb-3">
                 <img class="rounded-circle account-img mb-2"
-                    src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" alt="User Profile Picture"
+                    src="{{ get_image_url(user.image_file, 'profile_pics') }}" alt="User Profile Picture"
                     style="width: 120px; height: 120px; object-fit: cover;">
                 <h3 class="gradient-text mb-1">{{ user.username }}</h3>
                 {% if user.email == 'vipulyadav0709@gmail.com' %}
@@ -80,7 +80,7 @@
             <p class="text-muted small mb-3">
                 Posted by:
                 <img class="rounded-circle mb-1 me-1"
-                    src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt="PFP"
+                    src="{{ get_image_url(post.author.image_file, 'profile_pics') }}" alt="PFP"
                     style="width: 25px; height: 25px; object-fit: cover;">
                 <a href="{{ url_for('main.user_posts', username=post.author.username) }}"
                     class="text-decoration-none text-dark"><strong>{{ post.author.username }}</strong></a>
@@ -96,7 +96,7 @@
             <span class="ms-1">on {{ post.timestamp.strftime('%B %d, %Y') }}</span>
             </p>
             {% if post.image_file %}
-            <img src="{{ url_for('static', filename='post_pics/' + post.image_file) }}" alt="Post Image"
+            <img src="{{ get_image_url(post.image_file, 'post_pics') }}" alt="Post Image"
                 class="img-fluid rounded mb-3" style="max-height: 400px; width: 100%; object-fit: contain;">
             {% endif %}
             <hr class="divider my-3">
@@ -172,7 +172,7 @@
                 <div class="comments-list">
                     {% for comment in post.comments %}
                     <div class="d-flex mb-3">
-                        <img src="{{ url_for('static', filename='profile_pics/' + comment.author.image_file) }}"
+                        <img src="{{ get_image_url(comment.author.image_file, 'profile_pics') }}"
                             class="rounded-circle me-3 mt-1" style="width: 32px; height: 32px; object-fit: cover;">
                         <div class="glass-card flex-grow-1 p-3 m-0"
                             style="border-radius: 1rem; box-shadow: none; background: rgba(0,0,0,0.1);">
@@ -244,7 +244,7 @@
                                             class="btn btn-outline-light w-100 text-start d-flex align-items-center rounded-3 p-2 border-secondary"
                                             for="recipient_{{ post.id }}_{{ t_user.username }}"
                                             style="cursor: pointer;">
-                                            <img src="{{ url_for('static', filename='profile_pics/' + t_user.image_file) }}"
+                                            <img src="{{ get_image_url(t_user.image_file, 'profile_pics') }}"
                                                 class="rounded-circle me-3"
                                                 style="width: 35px; height: 35px; object-fit: cover;">
                                             <span class="fw-bold">{{ t_user.username }}</span>
@@ -285,7 +285,7 @@
                             </div>
                             <div class="card bg-dark text-white border-secondary mb-2">
                                 <div class="card-body p-2 d-flex">
-                                    <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}"
+                                    <img src="{{ get_image_url(post.author.image_file, 'profile_pics') }}"
                                         class="rounded-circle me-2"
                                         style="width: 24px; height: 24px; object-fit: cover;">
                                     <div class="text-truncate" style="max-width: 90%;">
