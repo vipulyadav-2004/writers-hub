@@ -7,14 +7,14 @@ from project.models import User
 from email_validator import validate_email as validate_email_mx, EmailNotValidError
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[DataRequired(), Email()], filters=[lambda x: x.lower() if x else x])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=80)])
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)], filters=[lambda x: x.lower() if x else x])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match.')])
@@ -81,7 +81,7 @@ class UpdatePasswordForm(FlaskForm):
 
 
 class UpdateEmailForm(FlaskForm):
-    email = StringField('New Email Address', validators=[DataRequired(), Email(), Length(max=120)])
+    email = StringField('New Email Address', validators=[DataRequired(), Email(), Length(max=120)], filters=[lambda x: x.lower() if x else x])
     submit = SubmitField('Update Email')
 
     def validate_email(self, email):

@@ -172,6 +172,9 @@ def google_authorize():
         return redirect(url_for('main.login_page'))
         
     email = user_info.get('email')
+    if email:
+        email = email.lower()
+        
     if not email:
         flash('Google account does not have a verified email.', 'danger')
         return redirect(url_for('main.login_page'))
