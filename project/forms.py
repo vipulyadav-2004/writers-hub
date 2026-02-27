@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Le
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from project.models import User
+from email_validator import validate_email as validate_email_mx, EmailNotValidError
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -28,6 +29,12 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('That email is already in use.')
+        
+        # Globally verify if the domain even exists and accepts emails (MX Record Check)
+        try:
+            validate_email_mx(email.data, check_deliverability=True)
+        except EmailNotValidError as e:
+            raise ValidationError(f"Invalid or Fake Email: {str(e)}")
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(min=1, max=150)])
@@ -82,6 +89,12 @@ class UpdateEmailForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email is already in use. Please choose a different one.')
+                
+            # Globally verify if the domain even exists and accepts emails (MX Record Check)
+            try:
+                validate_email_mx(email.data, check_deliverability=True)
+            except EmailNotValidError as e:
+                raise ValidationError(f"Invalid or Fake Email: {str(e)}")
 
 
 class DeleteAccountForm(FlaskForm):
