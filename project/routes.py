@@ -16,26 +16,38 @@ def handle_csrf_error(e):
     flash('Security token missing or invalid. Please try again.', 'danger')
     return redirect(request.referrer or url_for('main.main_page'))
 
-def save_picture(form_picture, folder):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    
-    # Ensure folder exists on Vercel (since empty folders often aren't pushed to Git)
-    folder_path = os.path.join(current_app.root_path, 'static', folder)
-    os.makedirs(folder_path, exist_ok=True)
-    
-    picture_path = os.path.join(folder_path, picture_fn)
+import cloudinary
+import cloudinary.uploader
 
+def save_picture(form_picture, folder):
+    # Depending on your form inputs, you may want to optimize the original before sending
+    # or you can rely on Cloudinary's native optimization API! Let's resize in pillow 
+    # and send the raw bytes up to save bandwidth
     output_size = (1200, 1200)
     if folder == 'profile_pics':
         output_size = (250, 250)
     
     i = Image.open(form_picture)
     i.thumbnail(output_size)
-    i.save(picture_path)
-
-    return picture_fn
+    
+    import io
+    # Convert PIL Image back to byte stream so Cloudinary can receive it
+    byte_io = io.BytesIO()
+    # Handle PNG vs JPEG format preservation
+    img_format = i.format if i.format else 'JPEG'
+    i.save(byte_io, format=img_format)
+    byte_io.seek(0)
+    
+    # Upload byte stream directly to cloudinary folder
+    # Assigns it a dynamic unique ID
+    response = cloudinary.uploader.upload(
+        byte_io, 
+        folder=f"writers_hub/{folder}", 
+        resource_type="image"
+    )
+    
+    # Cloudinary return a JSON blob, we just want the direct image URL string to save to our Database
+    return response.get("secure_url")
 
 @main.route('/')
 def main_page():

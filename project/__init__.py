@@ -14,9 +14,17 @@ oauth = OAuth()
 csrf = CSRFProtect()
 
 from werkzeug.middleware.proxy_fix import ProxyFix
+import cloudinary
 
 def create_app():
     app = Flask(__name__)
+    
+    # Initialize Cloudinary Connection Space
+    cloudinary.config(
+        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.environ.get('CLOUDINARY_API_KEY'),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+    )
     
     # Tell Flask it is behind a proxy (like Vercel) so it correctly resolves HTTPS URLs
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
