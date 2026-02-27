@@ -14,11 +14,10 @@
             <div class="list-group list-group-flush bg-transparent">
                 {% for list_user in users %}
                 <div
-                    class="list-group-item bg-transparent border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                    class="list-group-item bg-transparent border-0 py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                     <div class="d-flex align-items-center">
-                        <img class="rounded-circle me-3"
-                            src="{{ get_image_url(list_user.image_file, 'profile_pics') }}" alt="PFP"
-                            style="width: 50px; height: 50px; object-fit: cover;">
+                        <img class="rounded-circle me-3" src="{{ get_image_url(list_user.image_file, 'profile_pics') }}"
+                            alt="PFP" style="width: 50px; height: 50px; object-fit: cover;">
                         <div>
                             <h5 class="mb-1"><a href="{{ url_for('main.user_posts', username=list_user.username) }}"
                                     class="text-primary fw-bold text-decoration-none">{{ list_user.username }}</a></h5>
@@ -28,20 +27,26 @@
                         </div>
                     </div>
                     {% if current_user.is_authenticated and current_user.username != list_user.username %}
-                    <div class="d-flex align-items-center gap-2">
+                    <div
+                        class="d-flex align-items-stretch gap-2 flex-wrap w-100 justify-content-start justify-content-md-end mt-2 mt-md-0">
                         {% if current_user.is_following(list_user) %}
-                        <form action="{{ url_for('main.unfollow', username=list_user.username) }}" method="POST">
+                        <form action="{{ url_for('main.unfollow', username=list_user.username) }}" method="POST"
+                            class="m-0 flex-grow-1 flex-md-grow-0" style="min-width: 100px;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <button type="submit" class="btn btn-sm btn-secondary">Unfollow</button>
+                            <button type="submit"
+                                class="btn btn-sm btn-secondary w-100 h-100 d-flex align-items-center justify-content-center py-2 mb-0">Unfollow</button>
                         </form>
                         {% else %}
-                        <form action="{{ url_for('main.follow', username=list_user.username) }}" method="POST">
+                        <form action="{{ url_for('main.follow', username=list_user.username) }}" method="POST"
+                            class="m-0 flex-grow-1 flex-md-grow-0" style="min-width: 100px;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <button type="submit" class="btn btn-sm btn-auth">Follow</button>
+                            <button type="submit"
+                                class="btn btn-sm btn-auth w-100 h-100 d-flex align-items-center justify-content-center py-2 mb-0">Follow</button>
                         </form>
                         {% endif %}
                         <a href="{{ url_for('main.chat', username=list_user.username) }}"
-                            class="btn btn-sm btn-outline-primary">Message</a>
+                            class="btn btn-sm btn-outline-primary flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center py-2 mb-0"
+                            style="min-width: 100px;">Message</a>
                     </div>
                     {% endif %}
                 </div>
