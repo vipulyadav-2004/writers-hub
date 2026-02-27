@@ -237,7 +237,7 @@ def create_post():
 @login_required
 def update_post(post_id):
     post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
+    if post.author != current_user and not current_user.is_developer:
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
@@ -261,7 +261,7 @@ def update_post(post_id):
 def delete_post(post_id):
     print(f"DEBUG: Attempting to delete post {post_id}")
     post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
+    if post.author != current_user and not current_user.is_developer:
         print(f"DEBUG: Permission denied for user {current_user}")
         abort(403)
     db.session.delete(post)
@@ -426,6 +426,22 @@ def user_posts(username):
     user = User.query.filter_by(username=username).first_or_404()
     posts = Post.query.filter_by(author=user).order_by(Post.timestamp.desc()).all()
     return render_template('index.html', posts=posts, user=user, title=f"Posts by {user.username}")
+
+@main.route('/user/<int:user_id>/admin_delete', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    if not current_user.is_developer:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    if user == current_user:
+        flash("You cannot delete your own account via this button.", "warning")
+        return redirect(request.referrer or url_for('main.main_page'))
+    
+    # Cascade delete is handled by database, but we manually delete user
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"Account for '{user.username}' and all associated data was permanently deleted.", "success")
+    return redirect(url_for('main.main_page'))
 
 @main.route('/follow/<username>', methods=['POST'])
 @login_required

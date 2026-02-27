@@ -36,6 +36,10 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(user_id)
     
+    @property
+    def is_developer(self):
+        return self.email == 'vipulyadav0709@gmail.com'
+
     # Relationship: A user can have many posts
     # 'backref' adds a '.author' attribute to the Post model
     # 'lazy=True' means SQLAlchemy will load the data as needed

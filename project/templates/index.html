@@ -9,9 +9,8 @@
         <div class="glass-card text-center py-4 mb-4">
             <h2 class="auth-title mb-3">Profile</h2>
             <div class="mb-3">
-                <img class="rounded-circle account-img mb-2"
-                    src="{{ get_image_url(user.image_file, 'profile_pics') }}" alt="User Profile Picture"
-                    style="width: 120px; height: 120px; object-fit: cover;">
+                <img class="rounded-circle account-img mb-2" src="{{ get_image_url(user.image_file, 'profile_pics') }}"
+                    alt="User Profile Picture" style="width: 120px; height: 120px; object-fit: cover;">
                 <h3 class="gradient-text mb-1">{{ user.username }}</h3>
                 {% if user.email == 'vipulyadav0709@gmail.com' %}
                 <div class="mb-2 mt-1">
@@ -59,6 +58,14 @@
                 {% endif %}
                 <a href="{{ url_for('main.chat', username=user.username) }}"
                     class="btn btn-outline-primary px-4">Message</a>
+
+                {% if current_user.is_developer %}
+                <form action="{{ url_for('main.admin_delete_user', user_id=user.id) }}" method="POST"
+                    onsubmit="return confirm('WARNING: Are you sure you want to completely delete {{ user.username }}\'s account?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button type="submit" class="btn btn-danger px-4">Delete Account</button>
+                </form>
+                {% endif %}
             </div>
             {% endif %}
         </div>
@@ -79,9 +86,8 @@
             <h2 class="h4 fw-bold mb-1">{{ post.title }}</h2>
             <p class="text-muted small mb-3">
                 Posted by:
-                <img class="rounded-circle mb-1 me-1"
-                    src="{{ get_image_url(post.author.image_file, 'profile_pics') }}" alt="PFP"
-                    style="width: 25px; height: 25px; object-fit: cover;">
+                <img class="rounded-circle mb-1 me-1" src="{{ get_image_url(post.author.image_file, 'profile_pics') }}"
+                    alt="PFP" style="width: 25px; height: 25px; object-fit: cover;">
                 <a href="{{ url_for('main.user_posts', username=post.author.username) }}"
                     class="text-decoration-none text-dark"><strong>{{ post.author.username }}</strong></a>
                 {% if current_user.is_authenticated and current_user != post.author and not
@@ -96,8 +102,8 @@
             <span class="ms-1">on {{ post.timestamp.strftime('%B %d, %Y') }}</span>
             </p>
             {% if post.image_file %}
-            <img src="{{ get_image_url(post.image_file, 'post_pics') }}" alt="Post Image"
-                class="img-fluid rounded mb-3" style="max-height: 400px; width: 100%; object-fit: contain;">
+            <img src="{{ get_image_url(post.image_file, 'post_pics') }}" alt="Post Image" class="img-fluid rounded mb-3"
+                style="max-height: 400px; width: 100%; object-fit: contain;">
             {% endif %}
             <hr class="divider my-3">
             <p class="post-body">{{ post.body }}</p>
@@ -143,7 +149,7 @@
                 </div>
 
                 <div class="d-flex align-items-center flex-wrap gap-2 text-end">
-                    {% if post.author == current_user %}
+                    {% if post.author == current_user or current_user.is_developer %}
                     <a href="{{ url_for('main.update_post', post_id=post.id) }}"
                         class="btn btn-sm btn-secondary">Edit</a>
                     <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
@@ -192,7 +198,7 @@
 
         <!-- Delete Modal (Placed immediately after the card for context, but ideally should be top-level if possible, 
              however, unique IDs make this safe enough if z-index is handled correctly by Bootstrap) -->
-        {% if post.author == current_user %}
+        {% if post.author == current_user or current_user.is_developer %}
         <div class="modal fade" id="deleteModal{{ post.id }}" tabindex="-1"
             aria-labelledby="deleteModalLabel{{ post.id }}" aria-hidden="true">
             <div class="modal-dialog">
