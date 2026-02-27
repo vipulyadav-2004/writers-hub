@@ -20,7 +20,12 @@ def save_picture(form_picture, folder):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(current_app.root_path, 'static', folder, picture_fn)
+    
+    # Ensure folder exists on Vercel (since empty folders often aren't pushed to Git)
+    folder_path = os.path.join(current_app.root_path, 'static', folder)
+    os.makedirs(folder_path, exist_ok=True)
+    
+    picture_path = os.path.join(folder_path, picture_fn)
 
     output_size = (1200, 1200)
     if folder == 'profile_pics':

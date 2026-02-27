@@ -13,8 +13,13 @@ migrate = Migrate()  # Initialize Migrate
 oauth = OAuth()
 csrf = CSRFProtect()
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 def create_app():
     app = Flask(__name__)
+    
+    # Tell Flask it is behind a proxy (like Vercel) so it correctly resolves HTTPS URLs
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key-123')
     # Default to SQLite if DATABASE_URL is not set (useful for local development)
