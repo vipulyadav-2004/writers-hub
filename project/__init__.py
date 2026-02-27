@@ -55,5 +55,7 @@ def create_app():
 
     # Note: We usually stop using db.create_all() once using Migrations
     # but it doesn't hurt to keep it for the very first initialization.
+    with app.app_context():
+        db.create_all()
     
     return app
