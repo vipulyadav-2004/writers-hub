@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, abort, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, abort, current_app, session
 from flask_login import login_user, logout_user, current_user, login_required
 from sqlalchemy import or_, and_
 from project.models import User, Post, Message as DBMessage, Like, Comment, Notification, SavedPost
@@ -132,6 +132,8 @@ def verify_token_route(token):
     user.is_verified = True
     db.session.commit()
     flash('Your account has been verified successfully! You may now log in.', 'success')
+    if 'draft_post' in session:
+        return redirect(url_for('main.login_page', next=url_for('main.create_post')))
     return redirect(url_for('main.login_page'))
 
 @main.route("/login", methods=['GET', 'POST'])
@@ -147,7 +149,10 @@ def login_page():
                 flash('Please check your email and click the verification link before logging in.', 'warning')
                 return redirect(url_for('main.login_page'))
             login_user(user, remember=form.remember_me.data)
-            return redirect(url_for('main.profile_page'))
+            next_page = request.args.get('next')
+            if 'draft_post' in session:
+                return redirect(url_for('main.create_post'))
+            return redirect(next_page) if next_page else redirect(url_for('main.profile_page'))
         else:
             flash('Login failed. Please check email and password.', 'danger')
             
@@ -211,10 +216,11 @@ def google_authorize():
         flash('Logged in via Google!', 'success')
 
     login_user(user)
+    if 'draft_post' in session:
+        return redirect(url_for('main.create_post'))
     return redirect(url_for('main.main_page'))
 
 @main.route('/post/new', methods=['GET', 'POST'])
-@login_required
 def create_post():
     form = PostForm()
     if form.validate_on_submit():
@@ -222,6 +228,19 @@ def create_post():
         if form.picture.data:
             picture_file = save_picture(form.picture.data, 'post_pics')
             
+        if not current_user.is_authenticated:
+            session['draft_post'] = {
+                'title': form.title.data,
+                'body': form.body.data,
+                'author_name': form.author_name.data,
+                'picture_file': picture_file
+            }
+            flash('Please log in or register to publish your post. Your draft has been saved!', 'info')
+            return redirect(url_for('main.login_page', next=url_for('main.create_post')))
+
+        if not picture_file and 'draft_post' in session and session['draft_post'].get('picture_file'):
+            picture_file = session['draft_post']['picture_file']
+
         post = Post(
             title=form.title.data, 
             body=form.body.data, 
@@ -232,7 +251,15 @@ def create_post():
         db.session.add(post)
         db.session.commit()
         flash('Post created!', 'success')
+        if 'draft_post' in session:
+            session.pop('draft_post')
         return redirect(url_for('main.main_page'))
+    
+    if request.method == 'GET' and 'draft_post' in session:
+        draft = session['draft_post']
+        form.title.data = draft.get('title', '')
+        form.body.data = draft.get('body', '')
+        form.author_name.data = draft.get('author_name', '')
     
     return render_template('create_post.html', form=form, legend='Create New Post', title='New Post')
 
