@@ -49,6 +49,8 @@ def create_app():
     app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+    if os.environ.get('MAIL_MAX_EMAILS'):
+        app.config['MAIL_MAX_EMAILS'] = int(os.environ.get('MAIL_MAX_EMAILS'))
 
     db.init_app(app)
     login_manager.init_app(app)

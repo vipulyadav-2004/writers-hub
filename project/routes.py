@@ -25,6 +25,16 @@ If you did not request this account, you can safely ignore this email and nothin
 '''
     mail.send(msg)
 
+def send_notification_email(user, subject, body):
+    if not user.email_notif_enabled:
+        return
+    msg = Message(subject, recipients=[user.email])
+    msg.body = body
+    try:
+        mail.send(msg)
+    except Exception as e:
+        print(f"Failed to send notification email: {e}")
+
 @main.app_context_processor
 def inject_image_helper():
     def get_image_url(image_file, folder):
@@ -324,6 +334,7 @@ def like_post(post_id):
         if post.author != current_user:
             notif = Notification(user_id=post.author.id, message=f"{current_user.username} liked your post '{post.title[:20]}...'", link=url_for('main.user_posts', username=current_user.username))
             db.session.add(notif)
+            send_notification_email(post.author, 'New Like on Writer\'s Hub', f"{current_user.username} liked your post '{post.title}'.")
         db.session.commit()
         
     return redirect(request.referrer or url_for('main.main_page'))
@@ -340,6 +351,7 @@ def comment_post(post_id):
         if post.author != current_user:
             notif = Notification(user_id=post.author.id, message=f"{current_user.username} commented on your post '{post.title[:20]}...'", link=url_for('main.user_posts', username=current_user.username))
             db.session.add(notif)
+            send_notification_email(post.author, 'New Comment on Writer\'s Hub', f"{current_user.username} commented on your post '{post.title}':\n\n\"{body.strip()}\"")
         db.session.commit()
         flash('Comment added successfully!', 'success')
     else:
@@ -511,6 +523,7 @@ def follow(username):
     current_user.follow(user)
     notif = Notification(user_id=user.id, message=f"{current_user.username} started following you", link=url_for('main.user_posts', username=current_user.username))
     db.session.add(notif)
+    send_notification_email(user, 'New Follower on Writer\'s Hub', f"{current_user.username} started following you on Writer's Hub!")
     db.session.commit()
     flash(f'You are following {username}!', 'success')
     return redirect(request.referrer or url_for('main.user_posts', username=username))
