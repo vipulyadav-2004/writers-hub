@@ -566,10 +566,10 @@ def following(username):
 @main.route("/messages")
 @login_required
 def messages():
-    messages_query = Message.query.filter(
-        or_(Message.sender_id == current_user.id,
-            Message.recipient_id == current_user.id)
-    ).order_by(Message.timestamp.desc()).all()
+    messages_query = DBMessage.query.filter(
+        or_(DBMessage.sender_id == current_user.id,
+            DBMessage.recipient_id == current_user.id)
+    ).order_by(DBMessage.timestamp.desc()).all()
     
     chat_users = []
     seen_ids = set()
@@ -596,7 +596,7 @@ def chat(username):
         
     form = MessageForm()
     if form.validate_on_submit():
-        msg = Message(author=current_user, recipient=user, body=form.message.data)
+        msg = DBMessage(author=current_user, recipient=user, body=form.message.data)
         if form.picture.data:
             picture_file = save_picture(form.picture.data, 'message_pics')
             msg.image_file = picture_file
@@ -604,15 +604,15 @@ def chat(username):
         db.session.commit()
         return redirect(url_for('main.chat', username=username))
         
-    chat_messages = Message.query.filter(
+    chat_messages = DBMessage.query.filter(
         or_(
-            and_(Message.sender_id == current_user.id, Message.recipient_id == user.id),
-            and_(Message.sender_id == user.id, Message.recipient_id == current_user.id)
+            and_(DBMessage.sender_id == current_user.id, DBMessage.recipient_id == user.id),
+            and_(DBMessage.sender_id == user.id, DBMessage.recipient_id == current_user.id)
         )
-    ).order_by(Message.timestamp.asc()).all()
+    ).order_by(DBMessage.timestamp.asc()).all()
     
     # Mark messages as read
-    unread_messages = Message.query.filter_by(sender_id=user.id, recipient_id=current_user.id, is_read=False).all()
+    unread_messages = DBMessage.query.filter_by(sender_id=user.id, recipient_id=current_user.id, is_read=False).all()
     if unread_messages:
         for m in unread_messages:
             m.is_read = True
@@ -623,7 +623,7 @@ def chat(username):
 @main.route("/message/<int:message_id>/edit", methods=['POST'])
 @login_required
 def edit_message(message_id):
-    message = Message.query.get_or_404(message_id)
+    message = DBMessage.query.get_or_404(message_id)
     if message.author != current_user:
         abort(403)
     
@@ -641,7 +641,7 @@ def edit_message(message_id):
 @main.route("/message/<int:message_id>/delete", methods=['POST'])
 @login_required
 def delete_message(message_id):
-    message = Message.query.get_or_404(message_id)
+    message = DBMessage.query.get_or_404(message_id)
     if message.author != current_user:
         abort(403)
         
@@ -666,7 +666,7 @@ def share_post(post_id):
         flash('You cannot share a post with yourself.', 'warning')
         return redirect(request.referrer or url_for('main.main_page'))
 
-    msg = Message(
+    msg = DBMessage(
         author=current_user,
         recipient=recipient,
         body=message_text,
