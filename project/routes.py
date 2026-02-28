@@ -447,6 +447,8 @@ def search():
 
 @main.route('/user/<username>')
 def user_posts(username):
+    from urllib.parse import unquote
+    username = unquote(username)
     user = User.query.filter_by(username=username).first_or_404()
     posts = Post.query.filter_by(author=user).order_by(Post.timestamp.desc()).all()
     return render_template('index.html', posts=posts, user=user, title=f"Posts by {user.username}")
@@ -470,6 +472,8 @@ def admin_delete_user(user_id):
 @main.route('/follow/<username>', methods=['POST'])
 @login_required
 def follow(username):
+    from urllib.parse import unquote
+    username = unquote(username)
     user = User.query.filter_by(username=username).first()
     if user is None:
         flash(f'User {username} not found.', 'danger')
@@ -487,6 +491,8 @@ def follow(username):
 @main.route('/unfollow/<username>', methods=['POST'])
 @login_required
 def unfollow(username):
+    from urllib.parse import unquote
+    username = unquote(username)
     user = User.query.filter_by(username=username).first()
     if user is None:
         flash(f'User {username} not found.', 'danger')
@@ -502,6 +508,8 @@ def unfollow(username):
 @main.route('/user/<username>/followers')
 @login_required
 def followers(username):
+    from urllib.parse import unquote
+    username = unquote(username)
     user = User.query.filter_by(username=username).first_or_404()
     users = user.followers.all()
     return render_template('users_list.html', users=users, user=user, title="Followers")
@@ -509,6 +517,8 @@ def followers(username):
 @main.route('/user/<username>/following')
 @login_required
 def following(username):
+    from urllib.parse import unquote
+    username = unquote(username)
     user = User.query.filter_by(username=username).first_or_404()
     users = user.followed.all()
     return render_template('users_list.html', users=users, user=user, title="Following")
@@ -537,6 +547,8 @@ def messages():
 @main.route("/chat/<username>", methods=['GET', 'POST'])
 @login_required
 def chat(username):
+    from urllib.parse import unquote
+    username = unquote(username)
     user = User.query.filter_by(username=username).first_or_404()
     if user == current_user:
         flash('You cannot chat with yourself.', 'warning')
