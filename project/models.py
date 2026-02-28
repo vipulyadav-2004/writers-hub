@@ -55,6 +55,7 @@ class User(UserMixin, db.Model):
     email_notif_enabled = db.Column(db.Boolean, default=True)
     feed_sorting = db.Column(db.String(20), default='latest') # latest, popular
     accent_color = db.Column(db.String(20), default='purple')
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Followers relationship
     followed = db.relationship(

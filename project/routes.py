@@ -12,6 +12,14 @@ from PIL import Image
 
 main = Blueprint('main', __name__)
 
+from datetime import datetime
+
+@main.before_app_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+
 def send_verification_email(user):
     token = user.get_verification_token()
     msg = Message('Verify Your Email - Writer\'s Hub',
@@ -602,6 +610,17 @@ def chat(username):
             msg.image_file = picture_file
         db.session.add(msg)
         db.session.commit()
+        
+        from datetime import timedelta
+        # Send an email notification if the user is offline (not active in last 2 mins)
+        is_online = False
+        if getattr(user, 'last_seen', None):
+            if datetime.utcnow() - user.last_seen <= timedelta(minutes=2):
+                is_online = True
+                
+        if not is_online:
+            send_notification_email(user, 'New Message on Writer\'s Hub', f"You received a new message from {current_user.username}:\n\n\"{form.message.data}\"\n\nLog in to reply!")
+            
         return redirect(url_for('main.chat', username=username))
         
     chat_messages = DBMessage.query.filter(
