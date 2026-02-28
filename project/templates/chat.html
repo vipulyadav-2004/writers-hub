@@ -99,7 +99,7 @@
             </div>
 
             <div class="bg-white bg-opacity-10 border-top border-secondary border-opacity-25 p-3">
-                <form method="POST" action="" enctype="multipart/form-data">
+                <form id="chat-form" method="POST" action="" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
                     <div class="input-group">
                         <label class="btn btn-secondary rounded-start-pill d-flex align-items-center mb-0 px-3"
@@ -108,9 +108,10 @@
                             {{ form.picture(style="display: none;", id="picture-upload",
                             onchange="updateFileName(this)") }}
                         </label>
-                        {{ form.message(class="form-control bg-light text-dark shadow-none border-0 ps-3",
+                        {{ form.message(id="chat-message-input", class="form-control bg-light text-dark shadow-none
+                        border-0 ps-3",
                         placeholder="Type a message...", rows="1", style="resize:none;") }}
-                        <button class="btn btn-primary rounded-end-pill px-4" type="submit">
+                        <button id="chat-submit-btn" class="btn btn-primary rounded-end-pill px-4" type="submit">
                             <i class="bi bi-send-fill"></i> Send
                         </button>
                     </div>
@@ -180,6 +181,29 @@
                 el.innerHTML = formattedTime + iconHtml;
             }
         });
+
+        // Handle Enter for submission and Shift+Enter for new line
+        var msgInput = document.getElementById("chat-message-input");
+        var chatForm = document.getElementById("chat-form");
+        var submitBtn = document.getElementById("chat-submit-btn");
+
+        if (msgInput && chatForm) {
+            msgInput.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    if (e.shiftKey) {
+                        // Allow new line
+                        return;
+                    } else {
+                        // Prevent new line and submit form
+                        e.preventDefault();
+                        if (msgInput.value.trim() !== "" || document.getElementById('picture-upload').files.length > 0) {
+                            submitBtn.disabled = true; // Prevent double submission
+                            chatForm.submit();
+                        }
+                    }
+                }
+            });
+        }
     });
 
     function updateFileName(input) {
