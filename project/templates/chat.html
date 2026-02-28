@@ -9,8 +9,7 @@
                 <a href="{{ url_for('main.messages') }}" class="btn btn-sm btn-outline-secondary me-3">
                     <i class="bi bi-arrow-left"></i>
                 </a>
-                <img class="rounded-circle me-3"
-                    src="{{ get_image_url(user.image_file, 'profile_pics') }}" alt="PFP"
+                <img class="rounded-circle me-3" src="{{ get_image_url(user.image_file, 'profile_pics') }}" alt="PFP"
                     style="width: 40px; height: 40px; object-fit: cover;">
                 <h5 class="mb-0 gradient-text"><a href="{{ url_for('main.user_posts', username=user.username) }}"
                         class="text-decoration-none">{{ user.username }}</a></h5>
@@ -82,6 +81,13 @@
                     <small class="text-muted mt-1 px-1 message-time"
                         data-timestamp="{{ message.timestamp.isoformat() }}Z" style="font-size: 0.7rem;">
                         {{ message.timestamp.strftime('%H:%M • %b %d') }}
+                        {% if message.sender_id == current_user.id %}
+                        {% if message.is_read %}
+                        <i class="bi bi-check2-all text-primary ms-1" style="font-size: 0.85rem;" title="Seen"></i>
+                        {% else %}
+                        <i class="bi bi-check2 ms-1" style="font-size: 0.85rem;" title="Delivered"></i>
+                        {% endif %}
+                        {% endif %}
                     </small>
                 </div>
                 {% endfor %}

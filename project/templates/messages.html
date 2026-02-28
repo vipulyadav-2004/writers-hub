@@ -31,8 +31,19 @@
                                     class="mb-0 text-muted small text-truncate fw-{% if unread_count > 0 %}bold text-white{% else %}normal{% endif %}">
                                     {% if chat.last_message.sender_id == current_user.id %}
                                     <span class="fst-italic opacity-75">You:</span>
+                                    {{ chat.last_message.body[:30] }}{% if chat.last_message.body|length > 30 %}...{%
+                                    endif %}
+                                    {% if chat.last_message.is_read %}
+                                    <i class="bi bi-check2-all text-primary ms-1" style="font-size: 0.85rem;"
+                                        title="Seen"></i>
+                                    {% else %}
+                                    <i class="bi bi-check2 text-muted ms-1" style="font-size: 0.85rem;"
+                                        title="Delivered"></i>
                                     {% endif %}
-                                    {{ chat.last_message.body }}
+                                    {% else %}
+                                    {{ chat.last_message.body[:30] }}{% if chat.last_message.body|length > 30 %}...{%
+                                    endif %}
+                                    {% endif %}
                                 </p>
                             </div>
                         </div>
