@@ -77,6 +77,19 @@
             {% if post.author_name %}
             <p class="text-muted fst-italic mb-0 ms-lg-2">- Attribution: {{ post.author_name }}</p>
             {% endif %}
+
+            {% if post.tags %}
+            <div class="d-flex flex-wrap gap-1 ms-1 w-100 justify-content-end mt-2">
+                {% for tag in post.tags.split(',') %}
+                {% set tag = tag.strip() %}
+                {% if tag %}
+                <a href="{{ url_for('main.search', q=tag) }}" class="badge rounded-pill text-decoration-none shadow-sm"
+                    style="background-color: var(--accent-color, #a855f7); color: white; opacity: 0.9; font-size: 0.75rem;">#{{
+                    tag }}</a>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
 

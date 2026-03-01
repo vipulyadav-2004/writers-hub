@@ -144,6 +144,7 @@ class Post(db.Model):
     body = db.Column(db.Text, nullable=False)
     author_name = db.Column(db.String(100), nullable=False)
     image_file = db.Column(db.String(500), nullable=True)
+    tags = db.Column(db.String(255), nullable=True) # Comma-separated tags
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     
     # Foreign key to link posts to users

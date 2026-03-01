@@ -35,6 +35,19 @@
                 </div>
 
                 <div class="form-floating-custom">
+                    {{ form.tags(class="form-control" + (" is-invalid" if form.tags.errors else ""),
+                    placeholder="e.g. poems, nature, fiction") }}
+                    {{ form.tags.label(class="form-label") }}
+                    {% if form.tags.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.tags.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-floating-custom">
                     {{ form.body(class="form-control" + (" is-invalid" if form.body.errors else ""),
                     placeholder="Write your content here...", style="height: 200px;", rows=10) }}
                     {{ form.body.label(class="form-label") }}

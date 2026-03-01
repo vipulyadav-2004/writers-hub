@@ -251,6 +251,7 @@ def create_post():
                 'title': form.title.data,
                 'body': form.body.data,
                 'author_name': form.author_name.data,
+                'tags': form.tags.data,
                 'picture_file': picture_file
             }
             flash('Please log in or register to publish your post. Your draft has been saved!', 'info')
@@ -263,6 +264,7 @@ def create_post():
             title=form.title.data, 
             body=form.body.data, 
             author_name=form.author_name.data,
+            tags=form.tags.data,
             image_file=picture_file,
             author=current_user
         )
@@ -278,6 +280,7 @@ def create_post():
         form.title.data = draft.get('title', '')
         form.body.data = draft.get('body', '')
         form.author_name.data = draft.get('author_name', '')
+        form.tags.data = draft.get('tags', '')
     
     return render_template('create_post.html', form=form, legend='Create New Post', title='New Post')
 
@@ -295,6 +298,7 @@ def update_post(post_id):
         post.title = form.title.data
         post.body = form.body.data
         post.author_name = form.author_name.data
+        post.tags = form.tags.data
         db.session.commit()
         flash('Your post has been updated!', 'success')
         return redirect(url_for('main.main_page'))
@@ -302,6 +306,7 @@ def update_post(post_id):
         form.title.data = post.title
         form.body.data = post.body
         form.author_name.data = post.author_name
+        form.tags.data = post.tags
     return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
 
 @main.route('/post/<int:post_id>/delete', methods=['POST'])
@@ -487,10 +492,18 @@ def search():
     if query:
         # Search users by username (case insensitive)
         users = User.query.filter(User.username.ilike(f'%{query}%')).all()
+        # Search posts by author name or tags
+        posts = Post.query.filter(
+            or_(
+                Post.author_name.ilike(f'%{query}%'),
+                Post.tags.ilike(f'%{query}%')
+            )
+        ).order_by(Post.timestamp.desc()).all()
     else:
         users = []
+        posts = []
     
-    return render_template('search_results.html', users=users, query=query)
+    return render_template('search_results.html', users=users, posts=posts, query=query)
 
 @main.route('/user/<username>')
 def user_posts(username):

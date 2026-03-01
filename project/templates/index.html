@@ -185,6 +185,19 @@
                     <span class="badge bg-light text-dark py-2 px-3 border ms-lg-2">
                         <span class="text-muted">Written by:</span> {{ post.author_name }}
                     </span>
+                    {% if post.tags %}
+                    <div class="d-flex flex-wrap gap-1 ms-1">
+                        {% for tag in post.tags.split(',') %}
+                        {% set tag = tag.strip() %}
+                        {% if tag %}
+                        <a href="{{ url_for('main.search', q=tag) }}"
+                            class="badge rounded-pill text-decoration-none shadow-sm"
+                            style="background-color: var(--accent-color, #a855f7); color: white; opacity: 0.9; font-size: 0.75rem;">#{{
+                            tag }}</a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 

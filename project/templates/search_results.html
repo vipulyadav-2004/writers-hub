@@ -55,11 +55,19 @@
                 {% endfor %}
             </div>
         </div>
-        {% else %}
+        {% endif %}
+        {% if not users and not posts %}
         <div class="glass-card text-center py-5">
-            <h4 class="text-muted">No users found.</h4>
-            <p>Try searching for a different username.</p>
+            <h4 class="text-muted">No results found.</h4>
+            <p>Try searching for a different username, author, or tag.</p>
         </div>
+        {% endif %}
+
+        {% if posts %}
+        <h4 class="mt-5 mb-3 gradient-text">Pertaining Posts</h4>
+        {% for post in posts %}
+        {% include 'post_card_profile.html' %}
+        {% endfor %}
         {% endif %}
     </div>
 </div>

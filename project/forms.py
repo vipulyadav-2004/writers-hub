@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length, Optional
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from project.models import User
@@ -40,6 +40,7 @@ class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(min=1, max=150)])
     author_name = StringField('Author', validators=[DataRequired(), Length(max=100)])
     body = TextAreaField('Write here.....', validators=[DataRequired(), Length(min=1)], render_kw={"rows": 10})
+    tags = StringField('Tags (comma-separated)', validators=[Optional(), Length(max=255)])
     picture = FileField('Upload Image', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
     submit = SubmitField('Publish Post')
 
