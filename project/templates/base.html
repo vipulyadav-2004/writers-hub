@@ -463,6 +463,34 @@
     });
   </script>
 
+  <!-- Post Body Read More Toggle -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const postBodies = document.querySelectorAll('.post-body-content');
+      postBodies.forEach(body => {
+        if (body.scrollHeight > body.clientHeight) {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-link p-0 text-decoration-none mt-1 fw-bold';
+          btn.style.color = 'var(--accent-color, #a855f7)';
+          btn.style.fontSize = '0.9rem';
+          btn.textContent = 'Read more...';
+          btn.onclick = function () {
+            if (btn.textContent === 'Read more...') {
+              body.style.webkitLineClamp = 'unset';
+              body.style.lineClamp = 'unset';
+              btn.textContent = 'Read less';
+            } else {
+              body.style.webkitLineClamp = '10';
+              body.style.lineClamp = '10';
+              btn.textContent = 'Read more...';
+            }
+          };
+          body.parentNode.appendChild(btn);
+        }
+      });
+    });
+  </script>
+
   {% if current_user.is_authenticated %}
   <script>
     function markNotificationsRead() {
